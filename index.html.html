@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SarkerSiivous Business OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script>
+function checkPw(){
+  var pw=document.getElementById('pwInput').value;
+  var stored=localStorage.getItem('sarkerpw')||'sarker2025';
+  if(pw===stored||pw==='sarker2025'){
+    document.getElementById('pwScreen').style.display='none';
+    localStorage.setItem('sarkerSession',String(Date.now()));
+    localStorage.setItem('sarkerpw',stored);
+  } else {
+    document.getElementById('pwError').style.display='block';
+    document.getElementById('pwInput').value='';
+  }
+}
+function checkSession(){
+  var s=localStorage.getItem('sarkerSession');
+  if(s&&(Date.now()-parseInt(s))/3600000<8) document.getElementById('pwScreen').style.display='none';
+}
+</script>
+<style>
+:root{
+  --g900:#052e16;--g800:#064e3b;--g700:#065f46;--g600:#047857;
+  --g500:#059669;--g400:#10b981;--g300:#34d399;--g100:#d1fae5;--g50:#ecfdf5;
+  --white:#ffffff;--snow:#f8fafc;--slate:#0f172a;--mid:#475569;--mist:#94a3b8;
+  --border:#e2e8f0;--border2:#f1f5f9;--gold:#f59e0b;--red:#ef4444;--blue:#3b82f6;
+  --topbar:58px;--agentbar:44px;--sidebar:230px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);min-height:100vh;font-size:14px}
+.pw-screen{position:fixed;inset:0;background:var(--g800);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+.pw-logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#fff;text-align:center}
+.pw-logo span{display:block;font-size:13px;font-weight:400;color:var(--g300);margin-top:4px}
+.pw-box{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:32px;width:320px;text-align:center}
+.pw-box h3{font-family:'Syne',sans-serif;color:#fff;font-size:16px;margin-bottom:16px}
+.pw-input{width:100%;padding:12px;border-radius:10px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:16px;text-align:center;letter-spacing:3px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px}
+.pw-btn{width:100%;padding:12px;background:var(--g500);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer}
+.pw-error{color:#fca5a5;font-size:12px;margin-top:8px;display:none}
+.pw-hint{color:rgba(255,255,255,.4);font-size:11px;margin-top:12px}
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar);background:var(--g800);display:flex;align-items:center;padding:0 20px;gap:16px;z-index:200;box-shadow:0 2px 16px rgba(6,78,59,.4)}
+.tb-icon{width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.tb-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:#fff}
+.tb-name span{color:var(--g300);font-weight:400;font-size:12px;display:block;margin-top:-3px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,.85)}
+.tb-stat strong{color:#fff;font-weight:700}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:var(--g500);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:#fff}
+.agent-bar{position:fixed;top:var(--topbar);left:0;right:0;height:var(--agentbar);background:var(--g900);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;padding:0 20px;gap:8px;z-index:150}
+.agent-bar-lbl{font-size:11px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-right:4px}
+.agent-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.agent-pill:hover,.agent-pill.active{background:var(--g600);border-color:var(--g400);color:#fff}
+.a-dot{width:6px;height:6px;border-radius:50%;background:var(--g300)}
+.agent-wrap{position:fixed;bottom:0;left:var(--sidebar);right:0;height:370px;background:var(--white);border-top:2px solid var(--g500);z-index:140;display:none;flex-direction:column}
+.agent-wrap.open{display:flex}
+.agent-head{padding:10px 16px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;background:var(--g50)}
+.agent-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--g800);flex:1}
+.agent-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--mist);padding:4px 8px}
+.agent-msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.agent-msg{display:flex;gap:8px}
+.agent-msg.user{flex-direction:row-reverse}
+.agent-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:linear-gradient(135deg,var(--g700),var(--g500))}
+.agent-msg.user .agent-av{background:linear-gradient(135deg,#3b82f6,#0ea5e9);font-size:10px;font-weight:700;color:#fff;font-family:'Syne',sans-serif}
+.agent-bubble{max-width:78%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5}
+.agent-msg.ai .agent-bubble{background:var(--snow);border:1px solid var(--border);border-top-left-radius:3px}
+.agent-msg.user .agent-bubble{background:linear-gradient(135deg,var(--g700),var(--g600));color:#fff;border-top-right-radius:3px}
+.agent-input-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px}
+.agent-input{flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.agent-input:focus{border-color:var(--g500)}
+.agent-send{width:38px;height:38px;border-radius:9px;background:var(--g700);border:none;cursor:pointer;color:#fff;font-size:16px}
+.typing{display:flex;gap:4px;align-items:center}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--mist);animation:tdot 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+.sidebar{position:fixed;top:calc(var(--topbar) + var(--agentbar));left:0;bottom:0;width:var(--sidebar);background:var(--white);border-right:1px solid var(--border);overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sb-section{padding:14px 12px 6px}
+.sb-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--mist);padding:0 8px;margin-bottom:4px}
+.sb-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:9px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--mid);transition:all .16s;text-align:left;margin-bottom:1px}
+.sb-btn:hover{background:var(--g50);color:var(--g700)}
+.sb-btn.active{background:var(--g100);color:var(--g800);font-weight:600}
+.sb-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--snow)}
+.sb-btn.active .sb-icon{background:var(--g700)}
+.sb-divider{height:1px;background:var(--border2);margin:8px 12px}
+.sb-kpi{margin:6px 12px;padding:10px 12px;background:var(--g50);border-radius:10px;border:1px solid var(--g100)}
+.sb-kpi-label{font-size:10px;color:var(--g600);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.sb-kpi-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--g800);line-height:1.1;margin-top:2px}
+.sb-kpi-sub{font-size:11px;color:var(--g600);margin-top:1px}
+.progress-bar{height:5px;background:var(--g100);border-radius:3px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--g500),var(--g300));border-radius:3px;transition:width .6s}
+.main{margin-left:var(--sidebar);margin-top:calc(var(--topbar) + var(--agentbar));min-height:calc(100vh - var(--topbar) - var(--agentbar));padding:24px}
+.page{display:none}
+.page.active{display:block}
+.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--g900);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--mist);margin-bottom:20px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--g500),var(--g300))}
+.stat-card.blue::before{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+.stat-card.gold::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.stat-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--g800);line-height:1}
+.stat-card.blue .stat-num{color:#1d4ed8}
+.stat-card.gold .stat-num{color:#92400e}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--mist);margin-top:4px}
+.stat-icon{position:absolute;right:16px;top:16px;font-size:22px;opacity:.25}
+.stat-change{font-size:11px;color:var(--g500);font-weight:600;margin-top:6px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--slate)}
+.card-body{padding:16px 18px}
+.card-action{font-size:12px;color:var(--g600);font-weight:600;cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif}
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--mist);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border2)}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--border2);font-size:13px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--g50)}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.green{background:var(--g100);color:var(--g700)}
+.badge.red{background:#fee2e2;color:#991b1b}
+.badge.blue{background:#dbeafe;color:#1e40af}
+.badge.gold{background:#fef3c7;color:#92400e}
+.badge.gray{background:var(--border2);color:var(--mid)}
+.av{width:32px;height:32px;border-radius:50%;background:var(--g100);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--g700);flex-shrink:0;font-family:'Syne',sans-serif}
+.av.sub{background:#dbeafe;color:#1e40af}
+.btn{padding:9px 18px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;transition:all .18s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--g700);color:#fff}
+.btn-primary:hover{background:var(--g800)}
+.btn-outline{background:transparent;color:var(--g700);border:1.5px solid var(--g100)}
+.btn-outline:hover{background:var(--g50)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-danger{background:#fee2e2;color:#991b1b}
+.form-row{display:grid;gap:12px;margin-bottom:12px}
+.form-row.cols-2{grid-template-columns:1fr 1fr}
+.form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+label{font-size:12px;font-weight:600;color:var(--mid);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--slate);outline:none;transition:border-color .18s;background:var(--white)}
+input:focus,select:focus,textarea:focus{border-color:var(--g500)}
+textarea{resize:vertical;min-height:70px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:16px;max-width:560px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-head{padding:20px 24px 14px;border-bottom:1px solid var(--border2)}
+.modal-head h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:800}
+.modal-head p{font-size:12px;color:var(--mist);margin-top:3px}
+.modal-body{padding:20px 24px}
+.modal-foot{padding:14px 24px;border-top:1px solid var(--border2);display:flex;gap:8px;justify-content:flex-end}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:8px}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--g400),var(--g600));min-height:4px;cursor:pointer}
+.bar-label{font-size:10px;color:var(--mist);font-weight:500}
+.bar-val{font-size:10px;color:var(--g700);font-weight:600}
+.shift-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.shift-day-head{font-size:11px;font-weight:600;color:var(--mist);text-align:center;padding:4px}
+.shift-day{background:var(--snow);border:1px solid var(--border2);border-radius:7px;padding:6px;min-height:72px;cursor:pointer;transition:all .16s}
+.shift-day:hover{border-color:var(--g300);background:var(--g50)}
+.shift-day.today{border-color:var(--g500);background:var(--g50)}
+.shift-day-num{font-size:12px;font-weight:600;color:var(--slate);margin-bottom:4px}
+.shift-chip{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;background:var(--g100);color:var(--g800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-tab{padding:7px 18px;border-radius:8px;border:1.5px solid var(--border);background:var(--snow);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--mid);transition:all .18s}
+.task-tab.active{background:var(--g700);color:#fff;border-color:var(--g700)}
+.task-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.task-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.task-card-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--g800)}
+.task-card-price{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--g600)}
+.task-card-meta{display:flex;gap:8px;flex-wrap:wrap}
+.task-meta-pill{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:var(--g50);color:var(--g700);border:1px solid var(--g100)}
+.task-meta-pill.blue{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.task-meta-pill.gold{background:#fef3c7;color:#92400e;border-color:#fde68a}
+.worker-toggle{display:flex;background:var(--border2);border-radius:10px;padding:3px;margin-bottom:16px;width:fit-content}
+.worker-toggle-btn{padding:7px 20px;border-radius:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--mid);cursor:pointer;transition:all .2s}
+.worker-toggle-btn.active{background:var(--white);color:var(--g700);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.worker-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;transition:border-color .2s}
+.worker-card:hover{border-color:var(--g400)}
+.worker-info-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:4px}
+.worker-info-tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--mist)}
+.worker-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border2)}
+.worker-stat-box{background:var(--snow);border-radius:8px;padding:8px 10px;text-align:center}
+.worker-stat-val{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--g800)}
+.worker-stat-lbl{font-size:10px;color:var(--mist);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+.settings-section{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+.settings-section h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;color:var(--g800)}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border2)}
+.settings-row:last-child{border-bottom:none}
+.settings-label{font-size:13px;font-weight:600;color:var(--slate)}
+.settings-sub{font-size:11px;color:var(--mist);margin-top:2px}
+.hol-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border2)}
+.hol-row:last-child{border-bottom:none}
+.sal-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2)}
+.sal-row:last-child{border-bottom:none}
+.empty{text-align:center;padding:40px 20px;color:var(--mist)}
+.empty-icon{font-size:40px;margin-bottom:10px;opacity:.5}
+.empty-text{font-size:14px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--g800);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:500;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.city-wrap{position:relative}
+.city-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--slate);outline:none;transition:border-color .18s;background:var(--white)}
+.city-input:focus{border-color:var(--g500)}
+.city-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--g500);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:600;max-height:200px;overflow-y:auto;display:none;margin-top:2px}
+.city-dropdown.open{display:block}
+.city-option{padding:9px 12px;font-size:13px;cursor:pointer;transition:background .15s}
+.city-option:hover{background:var(--g50);color:var(--g700)}
+@media(max-width:900px){
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .grid-2,.grid-2-1,.grid-3{grid-template-columns:1fr}
+  .sidebar{width:56px}
+  .sb-btn span,.sb-label,.sb-kpi{display:none}
+  .sb-btn{justify-content:center}
+  .main{margin-left:56px}
+  .agent-wrap{left:56px}
+}
+</style>
+</head>
+<body>
+<div class="pw-screen" id="pwScreen">
+  <div class="pw-logo">🧹 SarkerSiivous<span>Business OS — Secure Access</span></div>
+  <div class="pw-box">
+    <h3>Enter your password</h3>
+    <input class="pw-input" type="password" id="pwInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="pw-btn" onclick="checkPw()">Unlock →</button>
+    <div class="pw-error" id="pwError">❌ Wrong password</div>
+    <div class="pw-hint">Default: sarker2025 · Change in Settings</div>
+  </div>
+</div>
+<header class="topbar">
+  <div class="tb-icon">🧹</div>
+  <div class="tb-name">SarkerSiivous<span>Business CRM</span></div>
+  <div class="tb-right">
+    <div class="tb-stat" id="tbDate"></div>
+    <div class="tb-stat">Revenue: <strong id="tbRevenue">€0</strong></div>
+    <div class="tb-stat">Target: <strong>€15,000</strong></div>
+    <div class="tb-avatar">D</div>
+  </div>
+</header>
+<div class="agent-bar">
+  <div class="agent-bar-lbl">🤖 AI Agents</div>
+  <button class="agent-pill" id="pill-assistant" onclick="openAgent('assistant')"><div class="a-dot"></div>Assistant</button>
+  <button class="agent-pill" id="pill-sales" onclick="openAgent('sales')"><div class="a-dot"></div>Sales</button>
+  <button class="agent-pill" id="pill-marketing" onclick="openAgent('marketing')"><div class="a-dot"></div>Marketing</button>
+  <button class="agent-pill" id="pill-accounting" onclick="openAgent('accounting')"><div class="a-dot"></div>Accounting</button>
+  <button class="agent-pill" id="pill-operations" onclick="openAgent('operations')"><div class="a-dot"></div>Operations</button>
+</div>
+<div class="agent-wrap" id="agentWrap">
+  <div class="agent-head">
+    <div class="a-dot" style="width:10px;height:10px;background:var(--g400)"></div>
+    <div class="agent-title" id="agentTitle">Assistant</div>
+    <button class="agent-close" onclick="closeAgent()">✕</button>
+  </div>
+  <div class="agent-msgs" id="agentMsgs"></div>
+  <div class="agent-input-row">
+    <input class="agent-input" id="agentInput" placeholder="Ask your agent..." onkeydown="if(event.key==='Enter')sendAgentMsg()">
+    <button class="agent-send" onclick="sendAgentMsg()">➤</button>
+  </div>
+</div>
+<aside class="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">Main</div>
+    <button class="sb-btn active" onclick="showPage('dashboard')" data-page="dashboard"><div class="sb-icon">📊</div><span>Dashboard</span></button>
+    <button class="sb-btn" onclick="showPage('clients')" data-page="clients"><div class="sb-icon">🏠</div><span>Clients</span></button>
+    <button class="sb-btn" onclick="showPage('cleaners')" data-page="cleaners"><div class="sb-icon">👷</div><span>Cleaners</span></button>
+    <button class="sb-btn" onclick="showPage('shifts')" data-page="shifts"><div class="sb-icon">📅</div><span>Shifts</span></button>
+    <button class="sb-btn" onclick="showPage('tasks')" data-page="tasks"><div class="sb-icon">🗂️</div><span>Tasks</span></button>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Finance</div>
+    <button class="sb-btn" onclick="showPage('salary')" data-page="salary"><div class="sb-icon">💶</div><span>Salary</span></button>
+    <button class="sb-btn" onclick="showPage('invoices')" data-page="invoices"><div class="sb-icon">🧾</div><span>Invoices</span></button>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">People</div>
+    <button class="sb-btn" onclick="showPage('holidays')" data-page="holidays"><div class="sb-icon">🏖️</div><span>Holidays</span></button>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Tools</div>
+    <button class="sb-btn" onclick="showPage('settings')" data-page="settings"><div class="sb-icon">⚙️</div><span>Settings</span></button>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-kpi">
+    <div class="sb-kpi-label">Monthly Target</div>
+    <div class="sb-kpi-val" id="sbRevenue">€0</div>
+    <div class="sb-kpi-sub">of €15,000 target</div>
+    <div class="progress-bar"><div class="progress-fill" id="sbProgress" style="width:0%"></div></div>
+  </div>
+  <div class="sb-kpi" style="margin-top:6px">
+    <div class="sb-kpi-label">Active Clients</div>
+    <div class="sb-kpi-val" id="sbClients">0</div>
+    <div class="sb-kpi-sub">total clients</div>
+  </div>
+</aside>
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-title">Good morning, Dipok 👋</div>
+  <div class="page-sub" id="dashSub">Here's your business overview for today</div>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-icon">🏠</div><div class="stat-num" id="dClients">0</div><div class="stat-label">Clients</div><div class="stat-change">Add your first client →</div></div>
+    <div class="stat-card blue"><div class="stat-icon">📅</div><div class="stat-num" id="dShifts">0</div><div class="stat-label">Shifts this month</div></div>
+    <div class="stat-card"><div class="stat-icon">👷</div><div class="stat-num" id="dCleaners">0</div><div class="stat-label">Cleaners</div></div>
+    <div class="stat-card gold"><div class="stat-icon">💶</div><div class="stat-num" id="dRevenue">€0</div><div class="stat-label">Revenue this month</div><div class="stat-change" style="color:var(--gold)">Target: €15,000</div></div>
+  </div>
+  <div class="grid-2-1">
+    <div class="card"><div class="card-head"><div class="card-title">📈 Monthly Shifts Overview</div><span class="badge green" id="chartYear">2025</span></div><div class="card-body"><div class="bar-chart" id="barChart"></div><div style="display:flex;gap:6px;margin-top:8px" id="barLabels"></div></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">📋 Today's Shifts</div><button class="card-action" onclick="showPage('shifts')">View all</button></div><div class="card-body" id="todayShifts"><div class="empty"><div class="empty-icon">📅</div><div class="empty-text">No shifts today</div></div></div></div>
+  </div>
+  <div class="grid-3">
+    <div class="card"><div class="card-head"><div class="card-title">🏠 Recent Clients</div><button class="card-action" onclick="showPage('clients')">View all</button></div><div class="card-body" id="dashClients"><div class="empty"><div class="empty-icon">🏠</div><div class="empty-text">No clients yet</div></div></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">👷 Cleaner Status</div><button class="card-action" onclick="showPage('cleaners')">Manage</button></div><div class="card-body" id="dashCleaners"><div class="empty"><div class="empty-icon">👷</div><div class="empty-text">No cleaners yet</div></div></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">🎂 Birthdays This Week</div><button class="card-action" onclick="showPage('cleaners')">All team</button></div><div class="card-body" id="dashBirthdays"><div class="empty"><div class="empty-icon">🎂</div><div class="empty-text">No birthdays this week</div></div></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><div class="card-title">📈 Client Growth</div><span class="badge green" id="clientGrowthYear">2025</span></div><div class="card-body"><div class="bar-chart" id="clientGrowthChart" style="height:80px"></div><div style="display:flex;gap:6px;margin-top:6px" id="clientGrowthLabels"></div></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">🏖️ Holidays & Absences</div><button class="card-action" onclick="showPage('holidays')">Manage</button></div><div class="card-body" style="padding:10px 14px"><div style="font-size:11px;font-weight:600;color:var(--mist);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px" id="holInProgress">In Progress • 0</div><div id="dashHolActive"></div><div style="font-size:11px;font-weight:600;color:var(--mist);text-transform:uppercase;letter-spacing:.5px;margin:8px 0 6px" id="holUpcoming">Upcoming • 0</div><div id="dashHolUpcoming"><div style="font-size:12px;color:var(--mist)">No upcoming holidays</div></div></div></div>
+  </div>
+</div>
+
+<!-- CLIENTS -->
+<div class="page" id="page-clients">
+  <div class="section-head"><div><div class="page-title">Clients</div><div class="page-sub">Manage all your cleaning clients</div></div><button class="btn btn-primary" onclick="openAddClientModal()">+ Add Client</button></div>
+  <div class="worker-toggle">
+    <button class="worker-toggle-btn active" onclick="switchClientView('home',this)">🏠 Home Clients</button>
+    <button class="worker-toggle-btn" onclick="switchClientView('office',this)">🏢 Office Clients</button>
+  </div>
+  <div class="card"><div class="card-head"><div class="card-title" id="clientTableTitle">Home Clients</div><input style="width:200px;padding:6px 10px;font-size:12px" placeholder="Search..." oninput="filterTable(this.value,'clientTbl')"></div><div class="tbl-wrap"><table class="tbl" id="clientTbl"><thead><tr><th>CLIENT</th><th>CITY</th><th>SERVICE</th><th>PRICE</th><th>FREQUENCY</th><th>CONTRACT START</th><th>CANCELLATION</th><th>PAYMENT TERMS</th><th>ACTIONS</th></tr></thead><tbody id="clientTbody"></tbody></table></div></div>
+</div>
+
+<!-- CLEANERS -->
+<div class="page" id="page-cleaners">
+  <div class="section-head"><div><div class="page-title">Cleaners & Subcontractors</div><div class="page-sub">Your cleaning team</div></div><button class="btn btn-primary" onclick="openModal('cleanerModal')">+ Add Worker</button></div>
+  <div class="worker-toggle"><button class="worker-toggle-btn active" onclick="switchWorkerView('Employee',this)">👷 Employees</button><button class="worker-toggle-btn" onclick="switchWorkerView('Subcontractor',this)">🏢 Subcontractors</button></div>
+  <div id="cleanerCards"><div class="empty"><div class="empty-icon">👷</div><div class="empty-text">No workers yet</div></div></div>
+</div>
+
+<!-- SHIFTS -->
+<div class="page" id="page-shifts">
+  <div class="section-head"><div><div class="page-title">Shifts</div><div class="page-sub">Who cleans where and when</div></div><button class="btn btn-primary" onclick="openModal('shiftModal')">+ Add Shift</button></div>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><div class="card-title">📅 Calendar — <span id="calMonthLabel"></span></div><div style="display:flex;gap:6px"><button class="btn btn-sm btn-outline" onclick="changeMonth(-1)">‹</button><button class="btn btn-sm btn-outline" onclick="changeMonth(1)">›</button></div></div><div class="card-body"><div class="shift-grid" id="calHeads"></div><div class="shift-grid" style="margin-top:4px" id="calDays"></div></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">All Shifts</div></div><div class="tbl-wrap" style="max-height:420px;overflow-y:auto"><table class="tbl"><thead><tr><th>Date</th><th>Client</th><th>Cleaner</th><th>Hours</th><th>Status</th><th>Actions</th></tr></thead><tbody id="shiftTbody"></tbody></table></div></div>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div class="page" id="page-tasks">
+  <div class="section-head"><div><div class="page-title">Tasks</div><div class="page-sub">Recurring jobs — auto-generates shifts up to 3 months</div></div><button class="btn btn-primary" onclick="openModal('taskModal')">+ Add Task</button></div>
+  <div style="display:flex;gap:6px;margin-bottom:16px"><button class="task-tab active" id="tab-Regular" onclick="switchTaskTab('Regular')">Regular</button><button class="task-tab" id="tab-Extra" onclick="switchTaskTab('Extra')">Extra (One-time)</button></div>
+  <div id="taskList"><div class="empty"><div class="empty-icon">🗂️</div><div class="empty-text">No tasks yet</div></div></div>
+</div>
+
+<!-- SALARY -->
+<div class="page" id="page-salary">
+  <div class="section-head"><div><div class="page-title">Salary Calculations</div><div class="page-sub">Auto-calculated from completed shifts</div></div><div style="display:flex;gap:8px;align-items:center"><select id="salaryMonth" onchange="renderSalary()" style="width:150px"><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select><select id="salaryYear" onchange="renderSalary()" style="width:90px"><option>2024</option><option selected>2025</option><option>2026</option></select><button class="btn btn-primary" onclick="exportSalaryPDF()">📄 Export PDF</button></div></div>
+  <div class="grid-2"><div class="card"><div class="card-head"><div class="card-title">💶 Salary Report</div></div><div class="card-body" id="salaryReport"><div class="empty"><div class="empty-icon">💶</div><div class="empty-text">Add cleaners and shifts to generate reports</div></div></div></div><div class="card"><div class="card-head"><div class="card-title">📊 Summary</div></div><div class="card-body" id="salarySummary"><div class="empty"><div class="empty-icon">📊</div><div class="empty-text">No data yet</div></div></div></div></div>
+  <div class="card"><div class="card-head"><div class="card-title">⚙️ Hourly Rates</div></div><div class="card-body" id="rateEditor"></div></div>
+</div>
+
+<!-- INVOICES -->
+<div class="page" id="page-invoices">
+  <div class="section-head"><div><div class="page-title">Invoices</div><div class="page-sub">Finnish ALV 25.5% — Viitenumero included</div></div><div style="display:flex;gap:8px"><button class="btn btn-outline" onclick="openModal('invoiceModal')">+ Manual</button><button class="btn btn-primary" onclick="openMonthlyGenerator()">🤖 Generate Monthly</button></div></div>
+  <div id="overdueAlert" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 18px;margin-bottom:16px"><strong style="color:#991b1b">⚠️ Overdue Invoices</strong> — <span id="overdueCount" style="color:#991b1b"></span></div>
+  <div id="draftSection" style="display:none;margin-bottom:16px"><div class="card"><div class="card-head"><div class="card-title">📋 Draft Invoices</div><div style="display:flex;gap:8px"><button class="btn btn-sm btn-outline" onclick="rejectAllDrafts()">✕ Discard all</button><button class="btn btn-sm btn-primary" onclick="approveAllDrafts()">✓ Approve all</button></div></div><div class="card-body" id="draftList"></div></div></div>
+  <div style="display:flex;gap:6px;margin-bottom:14px"><button class="btn btn-sm btn-primary" onclick="filterInvoices('all')">All</button><button class="btn btn-sm btn-outline" onclick="filterInvoices('Unpaid')">Unpaid</button><button class="btn btn-sm btn-outline" onclick="filterInvoices('Paid')">Paid</button><button class="btn btn-sm btn-outline" onclick="filterInvoices('Overdue')" style="color:var(--red);border-color:var(--red)">Overdue</button></div>
+  <div class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Client</th><th>Period</th><th>Amount</th><th>ALV</th><th>Total</th><th>Viitenumero</th><th>Due</th><th>Status</th><th>Actions</th></tr></thead><tbody id="invoiceTbody"></tbody></table></div></div>
+</div>
+
+<!-- HOLIDAYS -->
+<div class="page" id="page-holidays">
+  <div class="section-head"><div><div class="page-title">Holidays & Absences</div><div class="page-sub">Track cleaner time off</div></div><button class="btn btn-primary" onclick="openModal('holidayModal')">+ Add Holiday</button></div>
+  <div class="grid-2"><div class="card"><div class="card-head"><div class="card-title">🔄 In Progress</div></div><div class="card-body" id="holidaysActive"><div class="empty"><div class="empty-icon">🏖️</div><div class="empty-text">No active holidays</div></div></div></div><div class="card"><div class="card-head"><div class="card-title">📅 Upcoming</div></div><div class="card-body" id="holidaysUpcoming"><div class="empty"><div class="empty-icon">📅</div><div class="empty-text">No upcoming holidays</div></div></div></div></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-title">Settings</div>
+  <div class="page-sub">Company profile, security and data management</div>
+  <div class="settings-section"><h3>🏢 Company Profile</h3><div class="form-row cols-2"><div><label>Company Name</label><input id="setCompany" value="SarkerSiivous Oy"></div><div><label>Y-tunnus</label><input id="setYtunnus" value="3426720-5"></div></div><div class="form-row cols-2"><div><label>Phone</label><input id="setPhone" placeholder="+358 40 123 4567"></div><div><label>Email</label><input id="setEmail" placeholder="info@sarkersiivous.fi"></div></div><div class="form-row cols-2"><div><label>Bank IBAN</label><input id="setIban" placeholder="FI12 3456 7890 1234 56"></div><div><label>Monthly Revenue Target (€)</label><input id="setTarget" type="number" value="15000"></div></div><button class="btn btn-primary" onclick="saveSettings()">Save Profile ✓</button></div>
+  <div class="settings-section"><h3>🔐 Change Password</h3><div class="form-row cols-2"><div><label>New Password</label><input type="password" id="setPwNew"></div><div><label>Confirm</label><input type="password" id="setPwConfirm"></div></div><button class="btn btn-primary" onclick="changePassword()">Change Password</button></div>
+  <div class="settings-section"><h3>🛡️ Data & GDPR</h3><div class="settings-row"><div><div class="settings-label">Export all data</div><div class="settings-sub">Download complete backup</div></div><button class="btn btn-primary btn-sm" onclick="exportAllData()">📥 Export Backup</button></div><div class="settings-row"><div><div class="settings-label">Last backup</div><div class="settings-sub" id="lastBackupDate">Never</div></div><span class="badge gray">Manual</span></div></div>
+</div>
+
+</main>
+
+<!-- MODALS -->
+<!-- CLIENT MODAL -->
+<div class="modal-bg" id="clientModal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head"><h3 id="clientModalTitle">Add Home Client</h3><p id="clientModalSub">Residential cleaning client</p></div>
+    <div class="modal-body">
+      <div class="form-row"><label>Client Type *</label><div style="display:flex;gap:8px;margin-top:4px"><button type="button" class="task-tab active" id="cTypeHome" onclick="setClientType('home')">🏠 Home Client</button><button type="button" class="task-tab" id="cTypeOffice" onclick="setClientType('office')">🏢 Office Client</button></div></div>
+      <div id="cHomeFields">
+        <div class="form-row cols-2"><div><label>Full Name *</label><input id="cName" placeholder="e.g. Matti Virtanen"></div><div><label>Phone</label><input id="cPhone" placeholder="+358 40 123 4567"></div></div>
+        <div class="form-row cols-2"><div><label>Email</label><input id="cEmail" placeholder="matti@email.fi"></div><div><label>City *</label><div class="city-wrap"><input class="city-input" id="cCity" placeholder="Type city..." autocomplete="off" oninput="filterCities(this.value,'cCityDrop','cCity')" onfocus="filterCities(this.value,'cCityDrop','cCity')" onblur="closeCityDropdowns()"><div class="city-dropdown" id="cCityDrop"></div></div></div></div>
+        <div class="form-row"><label>Address *</label><input id="cAddress" placeholder="e.g. Mannerheimintie 5 A 12"></div>
+      </div>
+      <div id="cOfficeFields" style="display:none">
+        <div class="form-row cols-2"><div><label>Company Name *</label><input id="cCompany" placeholder="e.g. Hypergene Oy"></div><div><label>Y-tunnus</label><input id="cCompanyYtunnus" placeholder="1234567-8"></div></div>
+        <div class="form-row cols-2"><div><label>Contact Person *</label><input id="cContact" placeholder="e.g. Matti Virtanen"></div><div><label>Contact Phone</label><input id="cContactPhone" placeholder="+358 40 123 4567"></div></div>
+        <div class="form-row cols-2"><div><label>Contact Email</label><input id="cContactEmail" placeholder="matti@company.fi"></div><div><label>City *</label><div class="city-wrap"><input class="city-input" id="cCityOffice" placeholder="Type city..." autocomplete="off" oninput="filterCities(this.value,'cCityOfficeDrop','cCityOffice')" onfocus="filterCities(this.value,'cCityOfficeDrop','cCityOffice')" onblur="closeCityDropdowns()"><div class="city-dropdown" id="cCityOfficeDrop"></div></div></div></div>
+        <div class="form-row"><label>Address *</label><input id="cAddressOffice" placeholder="e.g. Aleksanterinkatu 48B, Helsinki"></div>
+      </div>
+      <div class="form-row cols-2"><div><label>Frequency *</label><select id="cFreq" onchange="toggleFreqTimes()"><option value="Weekly">Weekly</option><option value="Bi-weekly">Bi-weekly</option><option value="Monthly">Monthly</option><option value="On-call">On-call (as needed)</option><option value="One-time">One-time</option></select></div><div id="freqTimesWrap"><label>Times per week</label><select id="cFreqTimes"><option value="1">1x/week</option><option value="2">2x/week</option><option value="3" selected>3x/week</option><option value="4">4x/week</option><option value="5">5x/week</option><option value="6">6x/week</option><option value="7">7x/week</option></select></div></div>
+      <div id="onCallInfo" style="display:none;padding:10px 14px;background:#ede9fe;border-radius:8px;border:1px solid #c4b5fd;font-size:12px;color:#5b21b6;margin-bottom:8px">📞 On-call — client contacts you when needed.</div>
+      <div class="form-row"><label>Service Type *</label><select id="cService2"><option>Apartment cleaning</option><option>Office cleaning</option><option>Deep cleaning</option><option>Move-in/out cleaning</option><option>Window cleaning</option><option>After renovation</option></select></div>
+      <div class="form-row"><label>Pricing Type *</label><div style="display:flex;gap:8px;margin-top:4px"><button type="button" class="task-tab active" id="priceTypeVisit" onclick="setPriceType('visit')">Price per visit</button><button type="button" class="task-tab" id="priceTypeMonthly" onclick="setPriceType('monthly')">Fixed monthly</button></div></div>
+      <div class="form-row cols-2"><div id="priceVisitWrap"><label>Price per visit (€)</label><input id="cPrice" type="number" placeholder="120" step="0.01"></div><div id="priceMonthlyWrap" style="display:none"><label>Monthly price (€)</label><input id="cPriceMonthly" type="number" placeholder="480" step="0.01"></div></div>
+      <div style="border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><label style="margin:0;font-size:13px;font-weight:600">Extra Jobs This Month</label><button type="button" class="btn btn-sm btn-outline" onclick="addExtraJob()">+ Add Extra Job</button></div><div id="extraJobsList"><div style="font-size:12px;color:var(--mist)">No extra jobs added yet</div></div></div>
+      <div class="form-row cols-2"><div><label>Payment Terms *</label><select id="cPayTerms" onchange="toggleCustomDate()"><option value="7">7 days</option><option value="14" selected>14 days</option><option value="21">21 days</option><option value="30">30 days</option><option value="custom">Custom date</option></select><div id="customDateWrap" style="display:none;margin-top:6px"><input type="date" id="cCustomDate"></div></div><div><label>Invoice Email</label><input id="cInvEmail" placeholder="billing@company.fi"></div></div>
+      <div class="form-row cols-2"><div><label>Contract Start Date</label><input type="date" id="cContractStart"></div><div><label>Cancellation Period</label><select id="cCancelPeriod"><option value="">Not specified</option><option value="1">1 month</option><option value="2">2 months</option><option value="3">3 months</option></select></div></div>
+      <div class="form-row"><label>Notes</label><textarea id="cNotes" placeholder="Has a dog, key under mat..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client ✓</button></div>
+  </div>
+</div>
+
+<!-- CLEANER MODAL -->
+<div class="modal-bg" id="cleanerModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Add Worker</h3></div>
+    <div class="modal-body">
+      <div class="form-row cols-2"><div><label>Worker Type *</label><select id="clType"><option>Employee</option><option>Subcontractor</option></select></div><div><label>Full Name *</label><input id="clName" placeholder="e.g. Fatima Rahman"></div></div>
+      <div class="form-row cols-2"><div><label>Phone *</label><input id="clPhone" placeholder="+358 40 123 4567"></div><div><label>Email</label><input id="clEmail" placeholder="fatima@email.fi"></div></div>
+      <div class="form-row cols-2"><div><label>Start Date</label><input id="clStart" type="date"></div><div><label>Birthday</label><input id="clBirthday" type="date"></div></div>
+      <div class="form-row cols-2"><div><label>Hourly Rate (€) *</label><input id="clRate" type="number" placeholder="14.50" step="0.01"></div><div><label>Contract Type</label><select id="clContract"><option>Part-time</option><option>Full-time</option><option>Zero-hours</option><option>Subcontract</option></select></div></div>
+      <div class="form-row cols-2"><div><label>Tax Card %</label><input id="clTaxRate" type="number" placeholder="25" step="0.5"></div><div><label>Y-tunnus (subcontractors)</label><input id="clYtunnus" placeholder="1234567-8"></div></div>
+      <div class="form-row"><label>Bank IBAN</label><input id="clIban" placeholder="FI12 3456 7890 1234 56"></div>
+      <div class="form-row"><label>Notes</label><textarea id="clNotes" placeholder="Any notes..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('cleanerModal')">Cancel</button><button class="btn btn-primary" onclick="saveCleaner()">Save Worker ✓</button></div>
+  </div>
+</div>
+
+<!-- SHIFT MODAL -->
+<div class="modal-bg" id="shiftModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Add Shift</h3></div>
+    <div class="modal-body">
+      <div class="form-row cols-2"><div><label>Date *</label><input id="shDate" type="date"></div><div><label>Time</label><input id="shTime" type="time" value="09:00"></div></div>
+      <div class="form-row cols-2"><div><label>Client *</label><select id="shClient"><option value="">Select client...</option></select></div><div><label>Cleaner *</label><select id="shCleaner"><option value="">Select cleaner...</option></select></div></div>
+      <div class="form-row cols-2"><div><label>Hours *</label><input id="shHours" type="number" placeholder="3" step="0.5" min="0.5"></div><div><label>Status</label><select id="shStatus"><option>Scheduled</option><option>Completed</option><option>Cancelled</option></select></div></div>
+      <div class="form-row"><label>Notes</label><textarea id="shNotes" placeholder="Any notes..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('shiftModal')">Cancel</button><button class="btn btn-primary" onclick="saveShift()">Save Shift ✓</button></div>
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="modal-bg" id="taskModal">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-head"><h3>Add Task</h3><p>Auto-generates shifts up to 3 months</p></div>
+    <div class="modal-body">
+      <div class="form-row cols-2"><div><label>Service Type *</label><select id="tSvcType" onchange="filterTaskClients()"><option value="">Select type...</option><option value="home">Home cleaning</option><option value="office">Office cleaning</option></select></div><div><label>Client *</label><select id="tClient" onchange="autoFillTaskName()"><option value="">Select client...</option></select></div></div>
+      <div class="form-row" id="tTaskNameRow" style="display:none"><label>Task Name</label><div id="tTaskNameDisplay" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;background:var(--snow);font-weight:600;color:var(--g800)">—</div></div>
+      <div class="form-row"><label>Days of week *</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="daySelector"><button type="button" class="task-tab" style="padding:5px 12px;font-size:12px" onclick="toggleDay(this,'Mon')">Mon</button><button type="button" class="task-tab" style="padding:5px 12px;font-size:12px" onclick="toggleDay(this,'Tue')">Tue</button><button type="button" class="task-tab" style="padding:5px 12px;font-size:12px" onclick="toggleDay(this,'Wed')">Wed</button><button type="button" class="task-tab" style="padding:5px 12px;font-size:12px" onclick="toggleDay(this,'Thu')">Thu</button><button type="button" class="task-tab" style="padding:5px 12px;font-size:12px" onclick="toggleDay(this,'Fri')">Fri</button><button type="button" class="task-tab" style="padding:5px 12px;font-size:12px" onclick="toggleDay(this,'Sat')">Sat</button><button type="button" class="task-tab" style="padding:5px 12px;font-size:12px" onclick="toggleDay(this,'Sun')">Sun</button></div></div>
+      <div class="form-row cols-3"><div><label>Hours per visit *</label><input id="tHours" type="number" step="0.25" placeholder="3.5" oninput="calcTaskRate()"></div><div><label>Earnings per shift (€) *</label><input id="tEarnings" type="number" step="0.5" placeholder="45.00" oninput="calcTaskRate()"></div><div><label>Cycle</label><select id="tCycle"><option>Weekly</option><option>Bi-weekly</option><option>Monthly</option></select></div></div>
+      <div id="taskRateBox" style="display:none;padding:10px 14px;background:var(--g50);border-radius:8px;border:1px solid var(--g100);font-size:12px;color:var(--g700);margin-bottom:12px"></div>
+      <div class="form-row"><label>Assign Cleaner</label><select id="tCleaner"><option value="">Select cleaner...</option></select></div>
+      <div class="form-row cols-2"><div><label>Start Date *</label><input id="tStart" type="date"></div><div><label>Generate for</label><select id="tMonths"><option value="1">1 month</option><option value="2">2 months</option><option value="3" selected>3 months</option></select></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('taskModal')">Cancel</button><button class="btn btn-primary" onclick="saveTask()">Save & Generate Shifts →</button></div>
+  </div>
+</div>
+
+<!-- HOLIDAY MODAL -->
+<div class="modal-bg" id="holidayModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Add Holiday / Absence</h3></div>
+    <div class="modal-body">
+      <div class="form-row"><label>Cleaner *</label><select id="hlCleaner"><option value="">Select cleaner...</option></select></div>
+      <div class="form-row cols-2"><div><label>Start Date *</label><input id="hlStart" type="date"></div><div><label>Return Date *</label><input id="hlReturn" type="date"></div></div>
+      <div class="form-row"><label>Type</label><select id="hlType"><option>Holiday</option><option>Sick leave</option><option>Unpaid leave</option><option>Training</option><option>Other</option></select></div>
+      <div class="form-row"><label>Notes</label><textarea id="hlNotes" placeholder="Any notes..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('holidayModal')">Cancel</button><button class="btn btn-primary" onclick="saveHoliday()">Save ✓</button></div>
+  </div>
+</div>
+
+<!-- INVOICE MODAL -->
+<div class="modal-bg" id="invoiceModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Create Invoice</h3><p>Finnish ALV 25.5% — Viitenumero auto-generated</p></div>
+    <div class="modal-body">
+      <div class="form-row cols-2"><div><label>Client *</label><select id="invClient"><option value="">Select client...</option></select></div><div><label>Invoice Date *</label><input id="invDate" type="date"></div></div>
+      <div class="form-row cols-2"><div><label>Due Date *</label><input id="invDue" type="date"></div><div><label>Amount excl. ALV (€) *</label><input id="invAmount" type="number" placeholder="100" oninput="calcAlv()"></div></div>
+      <div class="form-row cols-2"><div><label>ALV 25.5%</label><input id="invAlv" readonly placeholder="25.50"></div><div><label>Total incl. ALV</label><input id="invTotal" readonly placeholder="125.50"></div></div>
+      <div class="form-row"><label>Description</label><textarea id="invDesc" placeholder="e.g. Apartment cleaning — April 2025"></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('invoiceModal')">Cancel</button><button class="btn btn-primary" onclick="saveInvoice()">Create Invoice ✓</button></div>
+  </div>
+</div>
+
+<!-- MONTHLY GEN MODAL -->
+<div class="modal-bg" id="monthlyGenModal">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-head"><h3>🤖 Monthly Invoice Generator</h3></div>
+    <div class="modal-body">
+      <div class="form-row cols-2"><div><label>Month</label><select id="genMonth"><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select></div><div><label>Year</label><select id="genYear"><option>2024</option><option selected>2025</option><option>2026</option></select></div></div>
+      <div id="genPreview" style="margin-top:8px;background:var(--snow);border-radius:10px;border:1px solid var(--border);padding:14px;max-height:280px;overflow-y:auto"><div style="font-size:12px;color:var(--mist)">Select month and year to preview</div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('monthlyGenModal')">Cancel</button><button class="btn btn-primary" onclick="generateMonthlyInvoices()">Generate Drafts →</button></div>
+  </div>
+</div>
+
+<!-- EDIT CLIENT MODAL -->
+<div class="modal-bg" id="editClientModal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head"><h3>Edit Client</h3><p id="editClientName">Edit client details</p></div>
+    <div class="modal-body">
+      <div class="form-row cols-2"><div><label>Full Name / Company *</label><input id="ecName"></div><div><label>Phone</label><input id="ecPhone"></div></div>
+      <div class="form-row cols-2"><div><label>Email</label><input id="ecEmail"></div><div><label>City *</label><div class="city-wrap"><input class="city-input" id="ecCity" placeholder="Type city..." autocomplete="off" oninput="filterCities(this.value,'ecCityDrop','ecCity')" onfocus="filterCities(this.value,'ecCityDrop','ecCity')" onblur="closeCityDropdowns()"><div class="city-dropdown" id="ecCityDrop"></div></div></div></div>
+      <div class="form-row"><label>Address *</label><input id="ecAddress"></div>
+      <div id="ecOfficeExtra" style="display:none">
+        <div class="form-row cols-2"><div><label>Contact Person</label><input id="ecContact"></div><div><label>Contact Phone</label><input id="ecContactPhone"></div></div>
+        <div class="form-row"><label>Contact Email</label><input id="ecContactEmail"></div>
+      </div>
+      <div class="form-row cols-2"><div><label>Frequency *</label><select id="ecFreq" onchange="toggleEcTimes()"><option value="Weekly">Weekly</option><option value="Bi-weekly">Bi-weekly</option><option value="Monthly">Monthly</option><option value="On-call">On-call (as needed)</option><option value="One-time">One-time</option></select></div><div id="ecFreqTimesWrap"><label>Times per week</label><select id="ecFreqTimes"><option value="1">1x/week</option><option value="2">2x/week</option><option value="3">3x/week</option><option value="4">4x/week</option><option value="5">5x/week</option><option value="6">6x/week</option><option value="7">7x/week</option></select></div></div>
+      <div class="form-row"><label>Service Type *</label><select id="ecService"><option>Apartment cleaning</option><option>Office cleaning</option><option>Deep cleaning</option><option>Move-in/out cleaning</option><option>Window cleaning</option><option>After renovation</option></select></div>
+      <div class="form-row"><label>Pricing Type *</label><div style="display:flex;gap:8px;margin-top:4px"><button type="button" class="task-tab active" id="ecPriceTypeVisit" onclick="setEcPriceType('visit')">Price per visit</button><button type="button" class="task-tab" id="ecPriceTypeMonthly" onclick="setEcPriceType('monthly')">Fixed monthly</button></div></div>
+      <div class="form-row cols-2"><div id="ecPriceVisitWrap"><label>Price per visit (€)</label><input id="ecPrice" type="number" step="0.01"></div><div id="ecPriceMonthlyWrap" style="display:none"><label>Monthly price (€)</label><input id="ecPriceMonthly" type="number" step="0.01"></div></div>
+      <div class="form-row cols-2"><div><label>Contract Start Date</label><input type="date" id="ecContractStart"></div><div><label>Cancellation Period</label><select id="ecCancelPeriod"><option value="">Not specified</option><option value="1">1 month</option><option value="2">2 months</option><option value="3">3 months</option></select></div></div>
+      <div class="form-row cols-2"><div><label>Payment Terms *</label><select id="ecPayTerms" onchange="toggleEcCustomDate()"><option value="7">7 days</option><option value="14">14 days</option><option value="21">21 days</option><option value="30">30 days</option><option value="custom">Custom date</option></select><div id="ecCustomDateWrap" style="display:none;margin-top:6px"><input type="date" id="ecCustomDate"></div></div><div><label>Invoice Email</label><input id="ecInvEmail"></div></div>
+      <div class="form-row"><label>Notes</label><textarea id="ecNotes"></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('editClientModal')">Cancel</button><button class="btn btn-primary" onclick="saveEditClient()">Save Changes ✓</button></div>
+  </div>
+</div>
+
+<!-- EDIT CLEANER MODAL -->
+<div class="modal-bg" id="editCleanerModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head"><h3>Edit Worker</h3><p id="editCleanerName">Edit worker details</p></div>
+    <div class="modal-body">
+      <div class="form-row cols-2"><div><label>Worker Type</label><select id="eclType"><option>Employee</option><option>Subcontractor</option></select></div><div><label>Full Name *</label><input id="eclName"></div></div>
+      <div class="form-row cols-2"><div><label>Phone</label><input id="eclPhone"></div><div><label>Email</label><input id="eclEmail"></div></div>
+      <div class="form-row cols-2"><div><label>Start Date</label><input id="eclStart" type="date"></div><div><label>Birthday</label><input id="eclBirthday" type="date"></div></div>
+      <div class="form-row cols-2"><div><label>Hourly Rate (€) *</label><input id="eclRate" type="number" step="0.01"></div><div><label>Contract Type</label><select id="eclContract"><option>Part-time</option><option>Full-time</option><option>Zero-hours</option><option>Subcontract</option></select></div></div>
+      <div class="form-row cols-2"><div><label>Tax Card %</label><input id="eclTaxRate" type="number" step="0.5"></div><div><label>Y-tunnus</label><input id="eclYtunnus"></div></div>
+      <div class="form-row"><label>Bank IBAN</label><input id="eclIban"></div>
+      <div class="form-row"><label>Notes</label><textarea id="eclNotes"></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('editCleanerModal')">Cancel</button><button class="btn btn-primary" onclick="saveEditCleaner()">Save Changes ✓</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ DATA ══
+var db={clients:[],cleaners:[],shifts:[],tasks:[],holidays:[],invoices:[],profile:{targetRevenue:15000}};
+var STORE='sarkerCRM_v3';
+function load(){try{var s=localStorage.getItem(STORE);if(s){var d=JSON.parse(s);db=Object.assign(db,d);if(!db.tasks)db.tasks=[];}}catch(e){}}
+function save(){localStorage.setItem(STORE,JSON.stringify(db));refreshAll();}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2800);}
+function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function formatDateFI(s){if(!s)return '—';var p=s.split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:s;}
+
+// ══ NAVIGATION ══
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.sb-btn').forEach(function(b){b.classList.remove('active');});
+  var page=document.getElementById('page-'+id);
+  if(page)page.classList.add('active');
+  document.querySelectorAll('.sb-btn').forEach(function(b){if(b.getAttribute('data-page')===id)b.classList.add('active');});
+  if(id==='shifts')renderCalendar();
+  if(id==='salary')renderSalary();
+  if(id==='holidays')renderHolidays();
+  if(id==='tasks')renderTasks();
+  if(id==='invoices')renderInvoices();
+  if(id==='clients')renderClients();
+  if(id==='cleaners')renderCleaners();
+}
+
+// ══ MODAL ══
+function openModal(id){
+  if(id==='shiftModal'){populateSelect('shClient',db.clients,'name');populateSelect('shCleaner',db.cleaners,'name');}
+  if(id==='holidayModal')populateSelect('hlCleaner',db.cleaners,'name');
+  if(id==='invoiceModal'){
+    populateSelect('invClient',db.clients,'name');
+    var now=new Date();document.getElementById('invDate').value=dateStr(now);
+    var due=new Date();due.setDate(due.getDate()+14);document.getElementById('invDue').value=dateStr(due);
+  }
+  if(id==='taskModal'){
+    document.getElementById('tSvcType').value='';
+    document.getElementById('tClient').innerHTML='<option value="">Select client...</option>';
+    document.getElementById('tTaskNameRow').style.display='none';
+    populateSelect('tCleaner',db.cleaners,'name');
+    selectedDays=[];
+    document.querySelectorAll('#daySelector button').forEach(function(b){b.classList.remove('active');});
+    var td=new Date();td.setDate(td.getDate()+14);document.getElementById('tStart').value=dateStr(td);
+  }
+  if(id==='monthlyGenModal'){var now=new Date();document.getElementById('genMonth').value=now.getMonth();document.getElementById('genYear').value=now.getFullYear();previewMonthly();}
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(function(bg){bg.addEventListener('click',function(e){if(e.target===bg)bg.classList.remove('open');});});
+function populateSelect(selId,arr,field){var sel=document.getElementById(selId);sel.innerHTML='<option value="">Select...</option>';arr.forEach(function(item,i){var o=document.createElement('option');o.value=i;o.textContent=item[field];sel.appendChild(o);});}
+function filterTable(q,tblId){document.querySelectorAll('#'+tblId+' tbody tr').forEach(function(r){r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});}
+
+// ══ VIITENUMERO ══
+function calcViitenumero(base){
+  base=String(base).replace(/[^0-9]/g,'');
+  var weights=[7,3,1];var digits=base.split('').reverse().map(Number);
+  var total=digits.reduce(function(sum,d,i){return sum+d*weights[i%3];},0);
+  return base+((10-(total%10))%10);
+}
+function formatViite(ref){var r=ref.split('').reverse().join('');var parts=[];for(var i=0;i<r.length;i+=5)parts.push(r.slice(i,i+5));return parts.join(' ').split('').reverse().join('').trim();}
+function generateViite(n){var base=String(new Date().getFullYear())+String(n).padStart(4,'0');var fin=calcViitenumero(base);return {finnish:formatViite(fin),raw:fin};}
+
+// ══ CITY AUTOCOMPLETE ══
+var FI_CITIES=['Akaa','Alajärvi','Alavieska','Alavus','Asikkala','Askola','Aura','Espoo','Eura','Eurajoki','Evijärvi','Forssa','Haapajärvi','Haapavesi','Hailuoto','Halsua','Hamina','Hankasalmi','Hanko','Harjavalta','Hartola','Hattula','Heinola','Heinävesi','Helsinki','Hirvensalmi','Hollola','Huittinen','Humppila','Hyrynsalmi','Hyvinkää','Hämeenkyrö','Hämeenlinna','Ii','Iisalmi','Iitti','Ikaalinen','Ilmajoki','Ilomantsi','Imatra','Inari','Inkoo','Isojoki','Isokyrö','Janakkala','Joensuu','Jokioinen','Joroinen','Joutsa','Juuka','Juva','Jyväskylä','Jämijärvi','Järvenpää','Jämsä','Kaarina','Kaavi','Kajaani','Kalajoki','Kangasala','Kangasniemi','Kankaanpää','Kannus','Karkkila','Karstula','Karvia','Kaskinen','Kauhajoki','Kauhava','Kauniainen','Kaustinen','Keitele','Kemi','Kemijärvi','Keminmaa','Kempele','Kerava','Keuruu','Kihniö','Kinnula','Kirkkonummi','Kitee','Kittilä','Kiuruvesi','Kivijärvi','Kokemäki','Kokkola','Kolari','Konnevesi','Kontiolahti','Korsnäs','Kotka','Kouvola','Kristiinankaupunki','Kruunupyy','Kuhmo','Kuhmoinen','Kuopio','Kuortane','Kurikka','Kustavi','Kuusamo','Kyyjärvi','Kärkölä','Kärsämäki','Lahti','Laihia','Laitila','Lapinjärvi','Lapinlahti','Lappajärvi','Lappeenranta','Lapua','Laukaa','Lemi','Lempäälä','Leppävirta','Lestijärvi','Lieksa','Lieto','Liminka','Liperi','Loimaa','Loppi','Loviisa','Luoto','Luumäki','Maalahti','Maarianhamina','Marttila','Masku','Merijärvi','Merikarvia','Miehikkälä','Mikkeli','Muhos','Multia','Muonio','Mustasaari','Muurame','Mynämäki','Myrskylä','Mäntsälä','Mäntyharju','Naantali','Nakkila','Nokia','Nousiainen','Nurmes','Nurmijärvi','Orimattila','Oripää','Orivesi','Oulainen','Oulu','Outokumpu','Padasjoki','Paimio','Paltamo','Parainen','Parikkala','Parkano','Pelkosenniemi','Pello','Perho','Pertunmaa','Petäjävesi','Pieksämäki','Pielavesi','Pietarsaari','Pihtipudas','Pirkkala','Polvijärvi','Pomarkku','Pori','Pornainen','Posio','Pudasjärvi','Pukkila','Punkalaidun','Puolanka','Puumala','Pyhäjoki','Pyhäjärvi','Pyhäntä','Pyhäranta','Pälkäne','Pöytyä','Raahe','Raasepori','Raisio','Rantasalmi','Ranua','Rauma','Rautalampi','Rautavaara','Rautjärvi','Reisjärvi','Riihimäki','Ristijärvi','Rovaniemi','Ruokolahti','Ruovesi','Rusko','Saarijärvi','Salla','Salo','Sastamala','Sauvo','Savitaipale','Savonlinna','Savukoski','Seinäjoki','Sievi','Siikainen','Siikajoki','Siikalatva','Siilinjärvi','Simo','Sipoo','Siuntio','Sodankylä','Soini','Somero','Sonkajärvi','Sotkamo','Sulkava','Suomussalmi','Suonenjoki','Sysmä','Säkylä','Taipalsaari','Taivalkoski','Taivassalo','Tammela','Tampere','Tervo','Tervola','Teuva','Tohmajärvi','Toholampi','Toivakka','Tornio','Turku','Tuusniemi','Tuusula','Tyrnävä','Ulvila','Urjala','Utajärvi','Utsjoki','Uurainen','Uusikaarlepyy','Uusikaupunki','Vaala','Vaasa','Valkeakoski','Valtimo','Vantaa','Varkaus','Vehmaa','Vesanto','Vesilahti','Veteli','Vieremä','Vihti','Viitasaari','Vimpeli','Virolahti','Virrat','Ylitornio','Ylivieska','Ylöjärvi','Ypäjä','Ähtäri','Äänekoski'];
+function filterCities(val,dropId,inputId){
+  var drop=document.getElementById(dropId);
+  var q=val.trim().toLowerCase();
+  if(q.length<1){drop.classList.remove('open');return;}
+  var matches=FI_CITIES.filter(function(c){return c.toLowerCase().startsWith(q);}).slice(0,8);
+  if(!matches.length){drop.classList.remove('open');return;}
+  drop.innerHTML='';
+  matches.forEach(function(c){var div=document.createElement('div');div.className='city-option';div.textContent=c;div.onmousedown=function(e){e.preventDefault();selectCity(c,dropId,inputId);};drop.appendChild(div);});
+  drop.classList.add('open');
+}
+function selectCity(city,dropId,inputId){var inp=document.getElementById(inputId);var drop=document.getElementById(dropId);if(inp)inp.value=city;if(drop)drop.classList.remove('open');}
+function closeCityDropdowns(){setTimeout(function(){document.querySelectorAll('.city-dropdown').forEach(function(d){d.classList.remove('open');});},200);}
+
+// ══ CLIENTS ══
+var clientView='home';
+var currentClientType='home';
+var extraJobs=[];
+
+function openAddClientModal(){
+  setClientType(clientView);
+  openModal('clientModal');
+}
+function setClientType(type){
+  currentClientType=type;
+  document.getElementById('cTypeHome').classList.toggle('active',type==='home');
+  document.getElementById('cTypeOffice').classList.toggle('active',type==='office');
+  document.getElementById('cHomeFields').style.display=type==='home'?'block':'none';
+  document.getElementById('cOfficeFields').style.display=type==='office'?'block':'none';
+  document.getElementById('clientModalTitle').textContent=type==='home'?'Add Home Client':'Add Office Client';
+  document.getElementById('clientModalSub').textContent=type==='home'?'Residential cleaning client':'Office or commercial cleaning client';
+}
+function switchClientView(type,btn){
+  clientView=type;
+  document.querySelectorAll('.worker-toggle-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('clientTableTitle').textContent=type==='home'?'Home Clients':'Office Clients';
+  renderClients();
+}
+function toggleFreqTimes(){
+  var freq=document.getElementById('cFreq').value;
+  document.getElementById('freqTimesWrap').style.display=freq==='Weekly'?'block':'none';
+  var info=document.getElementById('onCallInfo');
+  if(info)info.style.display=freq==='On-call'?'block':'none';
+}
+function setPriceType(type){
+  document.getElementById('priceTypeVisit').classList.toggle('active',type==='visit');
+  document.getElementById('priceTypeMonthly').classList.toggle('active',type==='monthly');
+  document.getElementById('priceVisitWrap').style.display=type==='visit'?'block':'none';
+  document.getElementById('priceMonthlyWrap').style.display=type==='monthly'?'block':'none';
+}
+function toggleCustomDate(){document.getElementById('customDateWrap').style.display=document.getElementById('cPayTerms').value==='custom'?'block':'none';}
+function addExtraJob(){extraJobs.push({desc:'',price:0});renderExtraJobs();}
+function removeExtraJob(idx){extraJobs.splice(idx,1);renderExtraJobs();}
+function renderExtraJobs(){
+  var el=document.getElementById('extraJobsList');
+  if(!extraJobs.length){el.innerHTML='<div style="font-size:12px;color:var(--mist)">No extra jobs added yet</div>';return;}
+  el.innerHTML=extraJobs.map(function(j,i){return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><input style="flex:1;padding:7px 10px;font-size:12px;border:1.5px solid var(--border);border-radius:9px;background:var(--white)" placeholder="Job description" value="'+j.desc+'" oninput="extraJobs['+i+'].desc=this.value"><input style="width:90px;padding:7px 10px;font-size:12px;border:1.5px solid var(--border);border-radius:9px;background:var(--white)" type="number" placeholder="€" value="'+(j.price||'')+'" oninput="extraJobs['+i+'].price=parseFloat(this.value)||0"><button type="button" class="btn btn-sm btn-danger" onclick="removeExtraJob('+i+')">✕</button></div>';}).join('');
+}
+function saveClient(){
+  var priceType=document.getElementById('priceTypeMonthly').classList.contains('active')?'monthly':'visit';
+  var price=priceType==='monthly'?parseFloat(document.getElementById('cPriceMonthly').value)||0:parseFloat(document.getElementById('cPrice').value)||0;
+  if(!price){toast('Please enter a price');return;}
+  var freq=document.getElementById('cFreq').value;
+  var freqTimes=freq==='Weekly'?parseInt(document.getElementById('cFreqTimes').value)||1:1;
+  var payTermsVal=document.getElementById('cPayTerms').value;
+  var payTerms=payTermsVal==='custom'?document.getElementById('cCustomDate').value:parseInt(payTermsVal)||14;
+  var client={id:Date.now(),clientType:currentClientType,service:document.getElementById('cService2').value,freq:freq,freqTimes:freqTimes,priceType:priceType,price:price,payTerms:payTerms,payTermsCustom:payTermsVal==='custom',invEmail:document.getElementById('cInvEmail').value,notes:document.getElementById('cNotes').value,extraJobs:extraJobs.slice(),contractStart:document.getElementById('cContractStart').value,cancelPeriod:document.getElementById('cCancelPeriod').value,added:dateStr(new Date())};
+  if(currentClientType==='home'){
+    var name=document.getElementById('cName').value.trim();
+    if(!name){toast('Client name is required');return;}
+    client.name=name;client.phone=document.getElementById('cPhone').value;client.email=document.getElementById('cEmail').value;client.city=document.getElementById('cCity').value;client.address=document.getElementById('cAddress').value;
+  } else {
+    var company=document.getElementById('cCompany').value.trim();
+    if(!company){toast('Company name is required');return;}
+    client.name=company;client.company=company;client.companyYtunnus=document.getElementById('cCompanyYtunnus').value;client.contact=document.getElementById('cContact').value;client.contactPhone=document.getElementById('cContactPhone').value;client.contactEmail=document.getElementById('cContactEmail').value;client.city=document.getElementById('cCityOffice').value;client.address=document.getElementById('cAddressOffice').value;
+  }
+  db.clients.push(client);extraJobs=[];
+  ['cName','cPhone','cEmail','cAddress','cPrice','cPriceMonthly','cNotes','cInvEmail','cContractStart','cCompany','cCompanyYtunnus','cContact','cContactPhone','cContactEmail','cCityOffice','cAddressOffice'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('cCancelPeriod').value='';
+  closeModal('clientModal');save();toast('Client added!');
+}
+function deleteClient(i){if(confirm('Delete this client?')){db.clients.splice(i,1);save();toast('Client deleted');}}
+function renderClients(){
+  var tbody=document.getElementById('clientTbody');
+  var filtered=db.clients.filter(function(c){return (c.clientType||'home')===clientView;});
+  var icon=clientView==='home'?'🏠':'🏢';
+  if(!filtered.length){tbody.innerHTML='<tr><td colspan="9"><div class="empty"><div class="empty-icon">'+icon+'</div><div class="empty-text">No '+(clientView==='home'?'home':'office')+' clients yet</div></div></td></tr>';return;}
+  tbody.innerHTML=filtered.map(function(c){
+    var i=db.clients.indexOf(c);
+    var freqLabel=c.freq+(c.freq==='Weekly'&&c.freqTimes?' ('+c.freqTimes+'x/week)':'');
+    var priceLabel=c.priceType==='monthly'?'€'+c.price+'/month':'€'+c.price+'/visit';
+    var payLabel=c.payTermsCustom?'Due: '+c.payTerms:c.payTerms+' days';
+    var extras=(c.extraJobs&&c.extraJobs.length)?'<span class="badge gold">+'+c.extraJobs.length+' extra</span>':'';
+    var contractLabel=formatDateFI(c.contractStart);
+    var cancelLabel=c.cancelPeriod?c.cancelPeriod+' month'+(parseInt(c.cancelPeriod)>1?'s':''):'—';
+    var freqBadgeStyle=c.freq==='On-call'?'style="background:#ede9fe;color:#5b21b6"':'';
+    var subtitle=c.clientType==='office'&&c.contact?'<div style="font-size:11px;color:var(--mist)">Contact: '+c.contact+'</div>':'<div style="font-size:11px;color:var(--mist)">'+c.address+'</div>';
+    return '<tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av'+(c.clientType==='office'?' sub':'')+'">'+c.name[0]+'</div><div><div style="font-weight:600">'+c.name+'</div>'+subtitle+'</div></div></td><td><span class="badge blue">'+c.city+'</span></td><td>'+c.service+'</td><td><strong>'+priceLabel+'</strong> '+extras+'</td><td><span class="badge gray" '+freqBadgeStyle+'>'+freqLabel+'</span></td><td style="font-size:12px">'+contractLabel+'</td><td><span class="badge '+(c.cancelPeriod?'gold':'gray')+'">'+cancelLabel+'</span></td><td style="font-size:12px">'+payLabel+'</td><td><div style="display:flex;gap:6px"><button class="btn btn-sm btn-outline" onclick="editClient('+i+')">✏️ Edit</button><button class="btn btn-sm btn-danger" onclick="deleteClient('+i+')">Delete</button></div></td></tr>';
+  }).join('');
+}
+
+// ══ EDIT CLIENT ══
+var editingClientIdx=-1;
+function editClient(i){
+  editingClientIdx=i;var c=db.clients[i];
+  document.getElementById('editClientName').textContent=c.name;
+  document.getElementById('ecName').value=c.name||'';
+  document.getElementById('ecPhone').value=c.phone||'';
+  document.getElementById('ecEmail').value=c.email||'';
+  document.getElementById('ecCity').value=c.city||'';
+  document.getElementById('ecAddress').value=c.address||'';
+  document.getElementById('ecService').value=c.service||'Apartment cleaning';
+  document.getElementById('ecFreq').value=c.freq||'Weekly';
+  document.getElementById('ecFreqTimes').value=c.freqTimes||'1';
+  toggleEcTimes();
+  var isOffice=c.clientType==='office';
+  document.getElementById('ecOfficeExtra').style.display=isOffice?'block':'none';
+  if(isOffice){document.getElementById('ecContact').value=c.contact||'';document.getElementById('ecContactPhone').value=c.contactPhone||'';document.getElementById('ecContactEmail').value=c.contactEmail||'';}
+  setEcPriceType(c.priceType||'visit');
+  document.getElementById('ecPrice').value=c.priceType==='visit'?(c.price||''):'';
+  document.getElementById('ecPriceMonthly').value=c.priceType==='monthly'?(c.price||''):'';
+  document.getElementById('ecContractStart').value=c.contractStart||'';
+  document.getElementById('ecCancelPeriod').value=c.cancelPeriod||'';
+  document.getElementById('ecInvEmail').value=c.invEmail||'';
+  document.getElementById('ecNotes').value=c.notes||'';
+  var pt=c.payTermsCustom?'custom':String(c.payTerms||'14');
+  document.getElementById('ecPayTerms').value=pt;
+  document.getElementById('ecCustomDateWrap').style.display=pt==='custom'?'block':'none';
+  if(pt==='custom')document.getElementById('ecCustomDate').value=c.payTerms||'';
+  openModal('editClientModal');
+}
+function saveEditClient(){
+  if(editingClientIdx<0)return;
+  var name=document.getElementById('ecName').value.trim();
+  if(!name){toast('Name is required');return;}
+  var priceType=document.getElementById('ecPriceTypeMonthly').classList.contains('active')?'monthly':'visit';
+  var price=priceType==='monthly'?parseFloat(document.getElementById('ecPriceMonthly').value)||0:parseFloat(document.getElementById('ecPrice').value)||0;
+  var payVal=document.getElementById('ecPayTerms').value;
+  var payTerms=payVal==='custom'?document.getElementById('ecCustomDate').value:parseInt(payVal)||14;
+  var c=db.clients[editingClientIdx];
+  c.name=name;c.phone=document.getElementById('ecPhone').value;c.email=document.getElementById('ecEmail').value;c.city=document.getElementById('ecCity').value;c.address=document.getElementById('ecAddress').value;c.service=document.getElementById('ecService').value;c.freq=document.getElementById('ecFreq').value;c.freqTimes=parseInt(document.getElementById('ecFreqTimes').value)||1;c.priceType=priceType;c.price=price;c.contractStart=document.getElementById('ecContractStart').value;c.cancelPeriod=document.getElementById('ecCancelPeriod').value;c.payTerms=payTerms;c.payTermsCustom=payVal==='custom';c.invEmail=document.getElementById('ecInvEmail').value;c.notes=document.getElementById('ecNotes').value;
+  if(c.clientType==='office'){c.contact=document.getElementById('ecContact').value;c.contactPhone=document.getElementById('ecContactPhone').value;c.contactEmail=document.getElementById('ecContactEmail').value;}
+  closeModal('editClientModal');save();toast('Client updated!');
+}
+function toggleEcTimes(){document.getElementById('ecFreqTimesWrap').style.display=document.getElementById('ecFreq').value==='Weekly'?'block':'none';}
+function setEcPriceType(type){document.getElementById('ecPriceTypeVisit').classList.toggle('active',type==='visit');document.getElementById('ecPriceTypeMonthly').classList.toggle('active',type==='monthly');document.getElementById('ecPriceVisitWrap').style.display=type==='visit'?'block':'none';document.getElementById('ecPriceMonthlyWrap').style.display=type==='monthly'?'block':'none';}
+function toggleEcCustomDate(){document.getElementById('ecCustomDateWrap').style.display=document.getElementById('ecPayTerms').value==='custom'?'block':'none';}
+
+// ══ CLEANERS ══
+var workerView='Employee';
+function switchWorkerView(type,btn){workerView=type;document.querySelectorAll('.worker-toggle-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderCleaners();}
+function saveCleaner(){
+  var name=document.getElementById('clName').value.trim();var rate=parseFloat(document.getElementById('clRate').value)||0;
+  if(!name||!rate){toast('Name and rate are required');return;}
+  db.cleaners.push({id:Date.now(),name:name,phone:document.getElementById('clPhone').value,email:document.getElementById('clEmail').value,start:document.getElementById('clStart').value,birthday:document.getElementById('clBirthday').value,rate:rate,contract:document.getElementById('clContract').value,iban:document.getElementById('clIban').value,notes:document.getElementById('clNotes').value,workerType:document.getElementById('clType').value,taxRate:parseFloat(document.getElementById('clTaxRate').value)||0,ytunnus:document.getElementById('clYtunnus').value});
+  ['clName','clPhone','clEmail','clStart','clBirthday','clRate','clIban','clNotes','clTaxRate','clYtunnus'].forEach(function(id){document.getElementById(id).value='';});
+  closeModal('cleanerModal');save();toast('Worker added!');
+}
+function updateRate(i,val){db.cleaners[i].rate=parseFloat(val)||0;save();}
+function deleteCleaner(i){if(confirm('Delete this worker?')){db.cleaners.splice(i,1);save();toast('Worker deleted');}}
+function getCleanerHours(idx,month,year){var c=db.cleaners[idx];return db.shifts.filter(function(s){var d=new Date(s.date);return s.cleanerName===c.name&&s.status==='Completed'&&d.getMonth()===month&&d.getFullYear()===year;}).reduce(function(sum,s){return sum+(parseFloat(s.hours)||0);},0);}
+function renderCleaners(){
+  var el=document.getElementById('cleanerCards');if(!el)return;
+  var now=new Date();var m=now.getMonth();var y=now.getFullYear();
+  var filtered=db.cleaners.filter(function(c){return (c.workerType||'Employee')===workerView;});
+  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">👷</div><div class="empty-text">No '+workerView.toLowerCase()+'s yet</div></div>';return;}
+  el.innerHTML=filtered.map(function(c){
+    var i=db.cleaners.indexOf(c);var hrs=getCleanerHours(i,m,y);var gross=hrs*c.rate;var net=gross*(1-(c.taxRate||0)/100);
+    var shifts=db.shifts.filter(function(s){var d=new Date(s.date);return s.cleanerName===c.name&&s.status==='Completed'&&d.getMonth()===m&&d.getFullYear()===y;}).length;
+    var isSub=(c.workerType||'Employee')==='Subcontractor';
+    return '<div class="worker-card"><div style="display:flex;align-items:flex-start;gap:12px"><div class="av'+(isSub?' sub':'')+'">'+c.name[0]+'</div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-family:Syne,sans-serif;font-size:15px;font-weight:700">'+c.name+'</div><span class="badge green">Active</span><span class="badge '+(isSub?'blue':'gray')+'">'+(c.contract||c.workerType||'Employee')+'</span></div><div class="worker-info-row">'+(c.phone?'<span class="worker-info-tag">📞 '+c.phone+'</span>':'')+(c.email?'<span class="worker-info-tag">📧 '+c.email+'</span>':'')+(c.start?'<span class="worker-info-tag">📅 '+formatDateFI(c.start)+'</span>':'')+(c.birthday?'<span class="worker-info-tag">🎂 '+formatDateFI(c.birthday)+'</span>':'')+'</div><div class="worker-info-row" style="margin-top:4px"><span class="worker-info-tag">💶 €'+c.rate+'/h</span>'+(c.iban?'<span class="worker-info-tag">🏦 '+c.iban+'</span>':'')+((!isSub&&c.taxRate)?'<span class="worker-info-tag">📋 Tax: '+c.taxRate+'%</span>':'')+(isSub&&c.ytunnus?'<span class="worker-info-tag">🏢 '+c.ytunnus+'</span>':'')+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm btn-outline" onclick="editCleaner('+i+')">✏️ Edit</button><button class="btn btn-sm btn-danger" onclick="deleteCleaner('+i+')">Delete</button></div></div><div class="worker-stat-grid"><div class="worker-stat-box"><div class="worker-stat-val">'+hrs+'h</div><div class="worker-stat-lbl">This month</div></div><div class="worker-stat-box"><div class="worker-stat-val">€'+gross.toFixed(0)+'</div><div class="worker-stat-lbl">'+(isSub?'Invoice':'Gross')+'</div></div>'+(isSub?'':'<div class="worker-stat-box"><div class="worker-stat-val">€'+net.toFixed(0)+'</div><div class="worker-stat-lbl">Net salary</div></div>')+'<div class="worker-stat-box"><div class="worker-stat-val">'+shifts+'</div><div class="worker-stat-lbl">Shifts done</div></div></div></div>';
+  }).join('');
+}
+
+// ══ EDIT CLEANER ══
+var editingCleanerIdx=-1;
+function editCleaner(i){
+  editingCleanerIdx=i;var c=db.cleaners[i];
+  document.getElementById('editCleanerName').textContent=c.name;
+  document.getElementById('eclType').value=c.workerType||'Employee';document.getElementById('eclName').value=c.name||'';document.getElementById('eclPhone').value=c.phone||'';document.getElementById('eclEmail').value=c.email||'';document.getElementById('eclStart').value=c.start||'';document.getElementById('eclBirthday').value=c.birthday||'';document.getElementById('eclRate').value=c.rate||'';document.getElementById('eclContract').value=c.contract||'Part-time';document.getElementById('eclTaxRate').value=c.taxRate||'';document.getElementById('eclYtunnus').value=c.ytunnus||'';document.getElementById('eclIban').value=c.iban||'';document.getElementById('eclNotes').value=c.notes||'';
+  openModal('editCleanerModal');
+}
+function saveEditCleaner(){
+  if(editingCleanerIdx<0)return;
+  var name=document.getElementById('eclName').value.trim();var rate=parseFloat(document.getElementById('eclRate').value)||0;
+  if(!name||!rate){toast('Name and rate required');return;}
+  var c=db.cleaners[editingCleanerIdx];
+  c.workerType=document.getElementById('eclType').value;c.name=name;c.phone=document.getElementById('eclPhone').value;c.email=document.getElementById('eclEmail').value;c.start=document.getElementById('eclStart').value;c.birthday=document.getElementById('eclBirthday').value;c.rate=rate;c.contract=document.getElementById('eclContract').value;c.taxRate=parseFloat(document.getElementById('eclTaxRate').value)||0;c.ytunnus=document.getElementById('eclYtunnus').value;c.iban=document.getElementById('eclIban').value;c.notes=document.getElementById('eclNotes').value;
+  closeModal('editCleanerModal');save();toast('Worker updated!');
+}
+
+// ══ SHIFTS ══
+var calYear=new Date().getFullYear();var calMonth=new Date().getMonth();
+function saveShift(){
+  var date=document.getElementById('shDate').value;var ci=document.getElementById('shClient').value;var cli=document.getElementById('shCleaner').value;var hrs=document.getElementById('shHours').value;
+  if(!date||ci===''||cli===''||!hrs){toast('All fields required');return;}
+  var client=db.clients[ci];var cleaner=db.cleaners[cli];
+  db.shifts.push({id:Date.now(),date:date,time:document.getElementById('shTime').value,clientName:client.name,clientCity:client.city,cleanerName:cleaner.name,hours:parseFloat(hrs),status:document.getElementById('shStatus').value,notes:document.getElementById('shNotes').value,revenue:client.price});
+  closeModal('shiftModal');save();renderCalendar();toast('Shift added!');
+}
+function toggleShiftStatus(i){db.shifts[i].status=db.shifts[i].status==='Completed'?'Scheduled':'Completed';save();toast('Status updated');}
+function deleteShift(i){if(confirm('Delete shift?')){db.shifts.splice(i,1);save();renderCalendar();toast('Shift deleted');}}
+function changeMonth(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+function renderCalendar(){
+  var days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  document.getElementById('calHeads').innerHTML=days.map(function(d){return '<div class="shift-day-head">'+d+'</div>';}).join('');
+  document.getElementById('calMonthLabel').textContent=new Date(calYear,calMonth).toLocaleString('en',{month:'long',year:'numeric'});
+  var firstDay=new Date(calYear,calMonth,1).getDay();var offset=(firstDay===0?6:firstDay-1);var daysInMonth=new Date(calYear,calMonth+1,0).getDate();var todayStr=dateStr(new Date());var html='';
+  for(var i=0;i<offset;i++)html+='<div></div>';
+  for(var d=1;d<=daysInMonth;d++){var ds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');var dayShifts=db.shifts.filter(function(s){return s.date===ds;});var isToday=ds===todayStr;var chips=dayShifts.slice(0,2).map(function(s){return '<div class="shift-chip">'+s.cleanerName.split(' ')[0]+'</div>';}).join('');if(dayShifts.length>2)chips+='<div class="shift-chip">+'+(dayShifts.length-2)+'</div>';html+='<div class="shift-day'+(isToday?' today':'')+'" onclick="renderShiftTable(\''+ds+'\')"><div class="shift-day-num">'+d+'</div>'+chips+'</div>';}
+  document.getElementById('calDays').innerHTML=html;renderShiftTable();
+}
+function renderShiftTable(filterDate){
+  var tbody=document.getElementById('shiftTbody');var shifts=db.shifts;
+  if(filterDate)shifts=shifts.filter(function(s){return s.date===filterDate;});
+  if(!shifts.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">📅</div><div class="empty-text">No shifts'+(filterDate?' on this day':' yet')+'</div></div></td></tr>';return;}
+  shifts=shifts.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  tbody.innerHTML=shifts.map(function(s){var ri=db.shifts.indexOf(s);return '<tr><td><strong>'+formatDateFI(s.date)+'</strong></td><td>'+s.clientName+'</td><td>'+s.cleanerName+'</td><td>'+s.hours+'h</td><td><span class="badge '+(s.status==='Completed'?'green':s.status==='Cancelled'?'red':'blue')+'" onclick="toggleShiftStatus('+ri+')" style="cursor:pointer">'+s.status+'</span></td><td><button class="btn btn-sm btn-danger" onclick="deleteShift('+ri+')">✕</button></td></tr>';}).join('');
+}
+
+// ══ TASKS ══
+var currentTaskTab='Regular';var selectedDays=[];
+function switchTaskTab(type){currentTaskTab=type;document.getElementById('tab-Regular').classList.toggle('active',type==='Regular');document.getElementById('tab-Extra').classList.toggle('active',type==='Extra');renderTasks();}
+function toggleDay(btn,day){if(selectedDays.includes(day)){selectedDays=selectedDays.filter(function(d){return d!==day;});btn.classList.remove('active');}else{selectedDays.push(day);btn.classList.add('active');}}
+function filterTaskClients(){
+  var type=document.getElementById('tSvcType').value;var sel=document.getElementById('tClient');
+  sel.innerHTML='<option value="">Select client...</option>';
+  if(!type)return;
+  db.clients.filter(function(c){return (c.clientType||'home')===type;}).forEach(function(c){var idx=db.clients.indexOf(c);var o=document.createElement('option');o.value=idx;o.textContent=c.name;sel.appendChild(o);});
+  document.getElementById('tTaskNameRow').style.display='none';
+}
+function autoFillTaskName(){
+  var ci=document.getElementById('tClient').value;var row=document.getElementById('tTaskNameRow');var display=document.getElementById('tTaskNameDisplay');
+  if(ci===''||ci===null){row.style.display='none';return;}
+  row.style.display='block';display.textContent=db.clients[ci].name;
+}
+function calcTaskRate(){
+  var h=parseFloat(document.getElementById('tHours').value)||0;var e=parseFloat(document.getElementById('tEarnings').value)||0;
+  var box=document.getElementById('taskRateBox');
+  if(h>0&&e>0){box.style.display='block';box.textContent='💡 Effective rate: €'+(e/h).toFixed(2)+'/hour';}
+  else box.style.display='none';
+}
+function saveTask(){
+  var ci=document.getElementById('tClient').value;var earnings=parseFloat(document.getElementById('tEarnings').value)||0;var hours=parseFloat(document.getElementById('tHours').value)||0;var start=document.getElementById('tStart').value;
+  if(ci===''||!earnings||!hours||!start||!selectedDays.length){toast('Please fill all fields and select at least one day');return;}
+  var client=db.clients[ci];var cleanerIdx=document.getElementById('tCleaner').value;var cleaner=cleanerIdx!==''?db.cleaners[cleanerIdx]:null;
+  var task={id:Date.now(),name:client.name,type:document.getElementById('tType')?document.getElementById('tType').value:'Regular',clientName:client.name,clientCity:client.city,price:earnings,hours:hours,days:selectedDays.slice(),cycle:document.getElementById('tCycle').value,cleanerName:cleaner?cleaner.name:'',start:start,genMonths:parseInt(document.getElementById('tMonths').value)};
+  db.tasks.push(task);var count=generateShiftsFromTask(task);
+  selectedDays=[];document.querySelectorAll('#daySelector button').forEach(function(b){b.classList.remove('active');});
+  closeModal('taskModal');save();toast(count+' shifts generated!');
+}
+function generateShiftsFromTask(task){
+  var dayMap={Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6,Sun:0};var minDate=new Date();minDate.setDate(minDate.getDate()+14);var endDate=new Date();endDate.setMonth(endDate.getMonth()+task.genMonths);var current=new Date(task.start);if(current<minDate)current=new Date(minDate);var count=0;var weekSkip=0;
+  while(current<=endDate){var dow=current.getDay();var dayName=Object.keys(dayMap).find(function(k){return dayMap[k]===dow;});if(task.days.includes(dayName)){var ok=task.cycle==='Weekly'||(task.cycle==='Bi-weekly'&&weekSkip%2===0)||(task.cycle==='Monthly'&&count===0);if(ok){db.shifts.push({id:Date.now()+Math.random(),date:dateStr(current),time:'',clientName:task.clientName,clientCity:task.clientCity,cleanerName:task.cleanerName,hours:task.hours,revenue:task.price,status:'Scheduled',taskId:task.id,notes:'Auto: '+task.name});count++;}}current.setDate(current.getDate()+1);if(current.getDay()===1)weekSkip++;}
+  return count;
+}
+function deleteTask(i){if(confirm('Delete task?')){db.tasks.splice(i,1);save();toast('Task deleted');}}
+function regenerateShifts(i){var task=db.tasks[i];db.shifts=db.shifts.filter(function(s){return s.taskId!==task.id;});var count=generateShiftsFromTask(task);save();toast('Regenerated '+count+' shifts');}
+function renderTasks(){
+  var list=document.getElementById('taskList');var filtered=(db.tasks||[]).filter(function(t){return (t.type||'Regular')===currentTaskTab;});
+  if(!filtered.length){list.innerHTML='<div class="empty"><div class="empty-icon">🗂️</div><div class="empty-text">No '+currentTaskTab+' tasks yet</div></div>';return;}
+  list.innerHTML=filtered.map(function(t){var ri=db.tasks.indexOf(t);var completed=db.shifts.filter(function(s){return s.taskId===t.id&&s.status==='Completed';}).length;var total=db.shifts.filter(function(s){return s.taskId===t.id;}).length;var rate=t.hours>0?(t.price/t.hours).toFixed(2):'0';return '<div class="task-card"><div class="task-card-head"><div><div class="task-card-name">'+t.name+'</div><div style="font-size:12px;color:var(--mist)">'+t.clientName+' · '+t.clientCity+'</div></div><div style="text-align:right"><div class="task-card-price">€'+t.price+'/shift</div><div style="font-size:11px;color:var(--mist)">'+t.hours+'h · €'+rate+'/h</div></div></div><div class="task-card-meta"><span class="task-meta-pill">'+t.days.join(' · ')+'</span><span class="task-meta-pill">'+t.cycle+'</span>'+(t.cleanerName?'<span class="task-meta-pill blue">👷 '+t.cleanerName+'</span>':'')+'</div><div style="font-size:12px;color:var(--mist);margin-top:8px">🔄 '+total+' generated &nbsp;·&nbsp; ✅ '+completed+' completed</div><div style="margin-top:10px;display:flex;gap:8px"><button class="btn btn-sm btn-outline" onclick="regenerateShifts('+ri+')">🔄 Regenerate</button><button class="btn btn-sm btn-danger" onclick="deleteTask('+ri+')">Delete</button></div></div>';}).join('');
+}
+
+// ══ SALARY ══
+function renderSalary(){
+  var month=parseInt(document.getElementById('salaryMonth').value);var year=parseInt(document.getElementById('salaryYear').value);
+  var report=document.getElementById('salaryReport');var summary=document.getElementById('salarySummary');var rateEl=document.getElementById('rateEditor');
+  if(!db.cleaners.length){report.innerHTML='<div class="empty"><div class="empty-icon">💶</div><div class="empty-text">Add cleaners first</div></div>';return;}
+  var totalHrs=0;var totalSal=0;
+  var rows=db.cleaners.map(function(c,i){var hrs=getCleanerHours(i,month,year);var sal=hrs*c.rate;totalHrs+=hrs;totalSal+=sal;return '<div class="sal-row"><div class="av">'+c.name[0]+'</div><div style="flex:1"><div style="font-weight:600;font-size:13px">'+c.name+'</div><div style="font-size:11px;color:var(--mist)">'+hrs+'h × €'+c.rate+'/h</div></div><div style="text-align:right"><div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:var(--g800)">€'+sal.toFixed(2)+'</div><div style="font-size:11px;color:var(--mist)">'+(c.iban||'IBAN not set')+'</div></div></div>';}).join('');
+  report.innerHTML=rows;
+  var mn=new Date(year,month).toLocaleString('en',{month:'long'});
+  summary.innerHTML='<div style="padding:14px;background:var(--g50);border-radius:10px;border:1px solid var(--g100);margin-bottom:12px"><div style="font-size:11px;color:var(--g600);font-weight:600;text-transform:uppercase">Total — '+mn+' '+year+'</div><div style="font-family:Syne,sans-serif;font-size:32px;font-weight:800;color:var(--g800)">€'+totalSal.toFixed(2)+'</div><div style="font-size:12px;color:var(--mist)">'+totalHrs+'h across '+db.cleaners.length+' workers</div></div><button class="btn btn-primary" style="width:100%" onclick="exportSalaryPDF()">📄 Export PDF</button>';
+  rateEl.innerHTML=db.cleaners.map(function(c,i){return '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border2)"><div class="av">'+c.name[0]+'</div><div style="flex:1;font-weight:600">'+c.name+'</div><div style="display:flex;align-items:center;gap:6px;font-size:13px">€<input type="number" value="'+c.rate+'" step="0.5" style="width:80px;padding:6px 10px" onchange="updateRate('+i+',this.value)"> /hour</div></div>';}).join('');
+}
+function exportSalaryPDF(){
+  var month=parseInt(document.getElementById('salaryMonth').value);var year=parseInt(document.getElementById('salaryYear').value);var mn=new Date(year,month).toLocaleString('en',{month:'long'});
+  var rows=db.cleaners.map(function(c,i){var hrs=getCleanerHours(i,month,year);return '<tr><td>'+c.name+'</td><td>'+(c.workerType||'Employee')+'</td><td>'+hrs+'h</td><td>€'+c.rate+'/h</td><td><strong>€'+(hrs*c.rate).toFixed(2)+'</strong></td><td>'+(c.iban||'—')+'</td></tr>';}).join('');
+  var total=db.cleaners.reduce(function(s,c,i){return s+getCleanerHours(i,month,year)*c.rate;},0);
+  var w=window.open('','_blank');w.document.write('<!DOCTYPE html><html><head><title>Salary '+mn+' '+year+'</title><style>body{font-family:Arial,sans-serif;padding:40px}h1{color:#064e3b}table{width:100%;border-collapse:collapse;margin-top:20px}th{background:#064e3b;color:#fff;padding:10px;text-align:left}td{padding:10px;border-bottom:1px solid #e2e8f0}.total{background:#d1fae5;font-weight:bold}</style></head><body><h1>SarkerSiivous Oy</h1><h2>Salary Report — '+mn+' '+year+'</h2><table><thead><tr><th>Name</th><th>Type</th><th>Hours</th><th>Rate</th><th>Total</th><th>IBAN</th></tr></thead><tbody>'+rows+'<tr class="total"><td colspan="4">TOTAL</td><td>€'+total.toFixed(2)+'</td><td></td></tr></tbody></table></body></html>');w.document.close();w.print();
+}
+
+// ══ INVOICES ══
+var currentInvFilter='all';
+function calcAlv(){var amt=parseFloat(document.getElementById('invAmount').value)||0;document.getElementById('invAlv').value='€'+(amt*0.255).toFixed(2);document.getElementById('invTotal').value='€'+(amt*1.255).toFixed(2);}
+function nextInvNum(){return 'INV-'+String(db.invoices.length+1).padStart(3,'0');}
+function saveInvoice(){
+  var ci=document.getElementById('invClient').value;var amt=parseFloat(document.getElementById('invAmount').value)||0;
+  if(ci===''||!amt){toast('Client and amount required');return;}
+  var client=db.clients[ci];var viite=generateViite(db.invoices.length+1);
+  db.invoices.push({id:Date.now(),num:nextInvNum(),viite:viite,clientName:client.name,payTerms:client.payTerms||14,date:document.getElementById('invDate').value,due:document.getElementById('invDue').value,amount:amt,alv:amt*0.255,total:amt*1.255,desc:document.getElementById('invDesc').value,status:'Unpaid',type:'manual',shifts:[]});
+  closeModal('invoiceModal');save();toast('Invoice created!');
+}
+function markPaid(i){db.invoices[i].status='Paid';save();toast('Marked as paid!');}
+function deleteInvoice(i){if(confirm('Delete invoice?')){db.invoices.splice(i,1);save();toast('Invoice deleted');}}
+function approveDraft(i){db.invoices[i].status='Unpaid';save();toast('Invoice approved!');}
+function rejectDraft(i){db.invoices.splice(i,1);save();toast('Draft discarded');}
+function approveAllDrafts(){db.invoices.forEach(function(inv){if(inv.status==='Draft')inv.status='Unpaid';});save();toast('All drafts approved!');}
+function rejectAllDrafts(){if(confirm('Discard all drafts?')){db.invoices=db.invoices.filter(function(inv){return inv.status!=='Draft';});save();toast('All drafts discarded');}}
+function filterInvoices(status){currentInvFilter=status;renderInvoices();}
+function checkOverdue(){var today=dateStr(new Date());db.invoices.forEach(function(inv){if(inv.status==='Unpaid'&&inv.due<today)inv.status='Overdue';});}
+function openMonthlyGenerator(){document.getElementById('genMonth').value=new Date().getMonth();document.getElementById('genYear').value=new Date().getFullYear();previewMonthly();openModal('monthlyGenModal');}
+document.addEventListener('change',function(e){if(e.target.id==='genMonth'||e.target.id==='genYear')previewMonthly();});
+function previewMonthly(){
+  var month=parseInt(document.getElementById('genMonth').value);var year=parseInt(document.getElementById('genYear').value);var mn=new Date(year,month).toLocaleString('en',{month:'long'});var preview=document.getElementById('genPreview');
+  var summaries=db.clients.map(function(client){var shifts=db.shifts.filter(function(s){var d=new Date(s.date);return s.clientName===client.name&&s.status==='Completed'&&d.getMonth()===month&&d.getFullYear()===year;});return {client:client,shifts:shifts,total:shifts.length*client.price};}).filter(function(cs){return cs.shifts.length>0;});
+  if(!summaries.length){preview.innerHTML='<div style="font-size:13px;color:var(--mist)">No completed shifts found for '+mn+' '+year+'</div>';return;}
+  var grand=summaries.reduce(function(s,cs){return s+cs.total;},0);
+  preview.innerHTML='<div style="font-weight:600;font-size:13px;margin-bottom:10px">'+summaries.length+' invoice(s) for '+mn+' '+year+'</div>'+summaries.map(function(cs){return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border2)"><div class="av">'+cs.client.name[0]+'</div><div style="flex:1"><div style="font-weight:600;font-size:13px">'+cs.client.name+'</div><div style="font-size:11px;color:var(--mist)">'+cs.shifts.length+' shift(s)</div></div><div style="font-weight:700;color:var(--g700)">€'+cs.total.toFixed(2)+'</div></div>';}).join('')+'<div style="display:flex;justify-content:space-between;margin-top:10px;font-weight:700;border-top:2px solid var(--g100);padding-top:10px"><span>Grand Total (incl. ALV)</span><span>€'+(grand*1.255).toFixed(2)+'</span></div>';
+}
+function generateMonthlyInvoices(){
+  var month=parseInt(document.getElementById('genMonth').value);var year=parseInt(document.getElementById('genYear').value);var mn=new Date(year,month).toLocaleString('en',{month:'long'});
+  var summaries=db.clients.map(function(client){var shifts=db.shifts.filter(function(s){var d=new Date(s.date);return s.clientName===client.name&&s.status==='Completed'&&d.getMonth()===month&&d.getFullYear()===year;});return {client:client,shifts:shifts,total:shifts.length*client.price};}).filter(function(cs){return cs.shifts.length>0;});
+  if(!summaries.length){toast('No completed shifts found');return;}
+  summaries.forEach(function(cs){var today=new Date();var due=new Date();due.setDate(due.getDate()+(cs.client.payTerms||14));var viite=generateViite(db.invoices.length+1);db.invoices.push({id:Date.now()+Math.random(),num:nextInvNum(),viite:viite,clientName:cs.client.name,payTerms:cs.client.payTerms||14,date:dateStr(today),due:dateStr(due),amount:cs.total,alv:cs.total*0.255,total:cs.total*1.255,desc:cs.client.service+' — '+mn+' '+year+' ('+cs.shifts.length+' visit(s))',status:'Draft',type:'monthly',period:mn+' '+year});});
+  closeModal('monthlyGenModal');save();toast(summaries.length+' draft invoice(s) created!');showPage('invoices');
+}
+function renderInvoices(){
+  checkOverdue();
+  var drafts=db.invoices.filter(function(inv){return inv.status==='Draft';});
+  var draftSection=document.getElementById('draftSection');var draftList=document.getElementById('draftList');
+  if(drafts.length){draftSection.style.display='block';draftList.innerHTML=drafts.map(function(inv){var i=db.invoices.indexOf(inv);return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2)"><div class="av">'+inv.clientName[0]+'</div><div style="flex:1"><div style="font-weight:600">'+inv.clientName+'</div><div style="font-size:11px;color:var(--mist)">'+inv.desc+'</div></div><strong style="color:var(--g700)">€'+inv.total.toFixed(2)+'</strong><button class="btn btn-sm btn-primary" onclick="approveDraft('+i+')">✓</button><button class="btn btn-sm btn-danger" onclick="rejectDraft('+i+')">✕</button></div>';}).join('');}
+  else draftSection.style.display='none';
+  var overdue=db.invoices.filter(function(inv){return inv.status==='Overdue';});var alertEl=document.getElementById('overdueAlert');
+  if(overdue.length){alertEl.style.display='block';document.getElementById('overdueCount').textContent=overdue.length+' invoice(s) overdue';}else alertEl.style.display='none';
+  var tbody=document.getElementById('invoiceTbody');var invoices=db.invoices.filter(function(inv){return inv.status!=='Draft';});
+  if(currentInvFilter!=='all')invoices=invoices.filter(function(inv){return inv.status===currentInvFilter;});
+  if(!invoices.length){tbody.innerHTML='<tr><td colspan="10"><div class="empty"><div class="empty-icon">🧾</div><div class="empty-text">No invoices</div></div></td></tr>';return;}
+  tbody.innerHTML=invoices.slice().reverse().map(function(inv){var i=db.invoices.indexOf(inv);var sc=inv.status==='Paid'?'green':inv.status==='Overdue'?'red':'gold';return '<tr><td><strong>'+inv.num+'</strong></td><td>'+inv.clientName+'</td><td style="font-size:12px">'+(inv.period||formatDateFI(inv.date))+'</td><td>€'+inv.amount.toFixed(2)+'</td><td style="color:var(--mist)">€'+inv.alv.toFixed(2)+'</td><td><strong>€'+inv.total.toFixed(2)+'</strong></td><td style="font-size:11px;color:var(--g700)">'+(inv.viite?inv.viite.finnish:'—')+'</td><td>'+formatDateFI(inv.due)+'</td><td><span class="badge '+sc+'">'+inv.status+'</span></td><td><div style="display:flex;gap:4px">'+(inv.status!=='Paid'?'<button class="btn btn-sm btn-primary" onclick="markPaid('+i+')">Paid</button>':'')+'<button class="btn btn-sm btn-danger" onclick="deleteInvoice('+i+')">✕</button></div></td></tr>';}).join('');
+}
+
+// ══ HOLIDAYS ══
+function saveHoliday(){
+  var ci=document.getElementById('hlCleaner').value;var start=document.getElementById('hlStart').value;var ret=document.getElementById('hlReturn').value;
+  if(ci===''||!start||!ret){toast('All fields required');return;}
+  db.holidays.push({id:Date.now(),cleanerName:db.cleaners[ci].name,start:start,return:ret,type:document.getElementById('hlType').value,notes:document.getElementById('hlNotes').value});
+  closeModal('holidayModal');save();toast('Holiday added!');
+}
+function deleteHoliday(i){db.holidays.splice(i,1);save();toast('Holiday removed');}
+function renderHolidays(){
+  var today=dateStr(new Date());
+  var active=db.holidays.filter(function(h){return h.start<=today&&h.return>=today;});var upcoming=db.holidays.filter(function(h){return h.start>today;}).sort(function(a,b){return a.start.localeCompare(b.start);});
+  document.getElementById('holidaysActive').innerHTML=active.length?active.map(function(h){var days=Math.ceil((new Date(h.return)-new Date())/86400000);return '<div class="hol-row"><div class="av">'+h.cleanerName[0]+'</div><div style="flex:1"><div style="font-weight:600;font-size:13px">'+h.cleanerName+'</div><div style="font-size:11px;color:var(--mist)">'+h.type+' · Returns '+formatDateFI(h.return)+'</div></div><div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:var(--g800)">'+days+'<span style="font-size:10px;color:var(--mist);font-weight:400;display:block">days left</span></div></div>';}).join(''):'<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No active holidays</div></div>';
+  document.getElementById('holidaysUpcoming').innerHTML=upcoming.length?upcoming.map(function(h){var ri=db.holidays.indexOf(h);var days=Math.ceil((new Date(h.start)-new Date())/86400000);return '<div class="hol-row"><div class="av">'+h.cleanerName[0]+'</div><div style="flex:1"><div style="font-weight:600;font-size:13px">'+h.cleanerName+'</div><div style="font-size:11px;color:var(--mist)">'+h.type+' · Starts '+formatDateFI(h.start)+'</div></div><div style="display:flex;align-items:center;gap:8px"><div style="font-family:Syne,sans-serif;font-size:16px;font-weight:800;color:var(--g700)">'+days+'d</div><button class="btn btn-sm btn-danger" onclick="deleteHoliday('+ri+')">✕</button></div></div>';}).join(''):'<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">No upcoming holidays</div></div>';
+}
+
+// ══ SETTINGS ══
+function saveSettings(){
+  db.profile={company:document.getElementById('setCompany').value,ytunnus:document.getElementById('setYtunnus').value,phone:document.getElementById('setPhone').value,email:document.getElementById('setEmail').value,iban:document.getElementById('setIban').value,targetRevenue:parseFloat(document.getElementById('setTarget').value)||15000};
+  save();toast('Settings saved!');
+}
+function changePassword(){
+  var n=document.getElementById('setPwNew').value;var c=document.getElementById('setPwConfirm').value;
+  if(!n||n.length<4){toast('Password must be at least 4 characters');return;}
+  if(n!==c){toast('Passwords do not match');return;}
+  localStorage.setItem('sarkerpw',n);document.getElementById('setPwNew').value='';document.getElementById('setPwConfirm').value='';toast('Password changed!');
+}
+function exportAllData(){
+  var blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='SarkerSiivous-Backup-'+dateStr(new Date())+'.json';a.click();URL.revokeObjectURL(url);
+  localStorage.setItem('sarkerLastBackup',dateStr(new Date()));document.getElementById('lastBackupDate').textContent='Last backup: '+dateStr(new Date());toast('Backup downloaded!');
+}
+
+// ══ DASHBOARD ══
+function renderDashboard(){
+  var now=new Date();var m=now.getMonth();var y=now.getFullYear();var todayStr=dateStr(now);
+  document.getElementById('dClients').textContent=db.clients.length;document.getElementById('dCleaners').textContent=db.cleaners.length;
+  var monthShifts=db.shifts.filter(function(s){var d=new Date(s.date);return d.getMonth()===m&&d.getFullYear()===y;});
+  document.getElementById('dShifts').textContent=monthShifts.length;
+  var rev=monthShifts.filter(function(s){return s.status==='Completed';}).reduce(function(sum,s){return sum+(s.revenue||0);},0);
+  document.getElementById('dRevenue').textContent='€'+rev.toLocaleString();document.getElementById('tbRevenue').textContent='€'+rev.toLocaleString();document.getElementById('sbRevenue').textContent='€'+rev.toLocaleString();
+  var pct=Math.min(100,Math.round(rev/(db.profile.targetRevenue||15000)*100));document.getElementById('sbProgress').style.width=pct+'%';document.getElementById('sbClients').textContent=db.clients.length;
+  var todayShifts=db.shifts.filter(function(s){return s.date===todayStr;});
+  document.getElementById('todayShifts').innerHTML=todayShifts.length?todayShifts.map(function(s){return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border2)"><div class="av">'+s.cleanerName[0]+'</div><div style="flex:1"><div style="font-weight:600;font-size:13px">'+s.cleanerName+'</div><div style="font-size:11px;color:var(--mist)">'+s.clientName+'</div></div><span class="badge '+(s.status==='Completed'?'green':'blue')+'">'+s.status+'</span></div>';}).join(''):'<div class="empty"><div class="empty-icon">☀️</div><div class="empty-text">No shifts today</div></div>';
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var counts=months.map(function(_,mi){return db.shifts.filter(function(s){var d=new Date(s.date);return d.getMonth()===mi&&d.getFullYear()===y;}).length;});
+  var maxC=Math.max.apply(null,counts.concat([1]));
+  document.getElementById('barChart').innerHTML=counts.map(function(c,mi){return '<div class="bar-wrap"><div class="bar-val">'+(c||'')+'</div><div class="bar" style="height:'+(Math.round(c/maxC*80)+4)+'px;'+(mi===m?'background:linear-gradient(180deg,var(--g300),var(--g500))':'')+'"></div></div>';}).join('');
+  document.getElementById('barLabels').innerHTML=counts.map(function(_,mi){return '<div style="flex:1;text-align:center;font-size:9px;color:'+(mi===m?'var(--g700)':'var(--mist)')+';font-weight:'+(mi===m?700:400)+'">'+months[mi]+'</div>';}).join('');
+  document.getElementById('chartYear').textContent=y;
+  document.getElementById('dashClients').innerHTML=db.clients.length?db.clients.slice(-4).reverse().map(function(c){return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2)"><div class="av'+(c.clientType==='office'?' sub':'')+'">'+c.name[0]+'</div><div style="flex:1"><div style="font-weight:600;font-size:13px">'+c.name+'</div><div style="font-size:11px;color:var(--mist)">'+c.city+'</div></div><span style="font-weight:700;color:var(--g700)">€'+c.price+'</span></div>';}).join(''):'<div class="empty"><div class="empty-icon">🏠</div><div class="empty-text">No clients yet</div></div>';
+  document.getElementById('dashCleaners').innerHTML=db.cleaners.length?db.cleaners.slice(0,5).map(function(c){return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2)"><div class="av">'+c.name[0]+'</div><div style="flex:1"><div style="font-weight:600;font-size:13px">'+c.name+'</div><div style="font-size:11px;color:var(--mist)">€'+c.rate+'/h</div></div><span class="badge green">Active</span></div>';}).join(''):'<div class="empty"><div class="empty-icon">👷</div><div class="empty-text">No cleaners yet</div></div>';
+  var bdays=db.cleaners.filter(function(c){if(!c.birthday)return false;var b=new Date(c.birthday);var thisYear=new Date(now.getFullYear(),b.getMonth(),b.getDate());var diff=(thisYear-now)/86400000;return diff>=-1&&diff<=7;});
+  document.getElementById('dashBirthdays').innerHTML=bdays.length?bdays.map(function(c){var b=new Date(c.birthday);return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border2)"><div class="av">'+c.name[0]+'</div><div style="flex:1;font-weight:600;font-size:13px">'+c.name+'</div><div style="font-size:12px;color:var(--g700);font-weight:600">🎂 '+b.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</div></div>';}).join(''):'<div class="empty"><div class="empty-icon">🎂</div><div class="empty-text">No birthdays this week</div></div>';
+  var cgCounts=months.map(function(_,mi){return db.clients.filter(function(c){if(!c.added)return false;var d=new Date(c.added);return d.getMonth()===mi&&d.getFullYear()===y;}).length;});
+  var cgMax=Math.max.apply(null,cgCounts.concat([1]));
+  document.getElementById('clientGrowthChart').innerHTML=cgCounts.map(function(c,mi){return '<div class="bar-wrap"><div class="bar-val">'+(c||'')+'</div><div class="bar" style="height:'+(Math.round(c/cgMax*64)+4)+'px;'+(mi===m?'background:linear-gradient(180deg,var(--g300),var(--g500))':'')+'"></div></div>';}).join('');
+  document.getElementById('clientGrowthLabels').innerHTML=cgCounts.map(function(_,mi){return '<div style="flex:1;text-align:center;font-size:9px;color:'+(mi===m?'var(--g700)':'var(--mist)')+'">'+months[mi]+'</div>';}).join('');
+  document.getElementById('clientGrowthYear').textContent=y;
+  var active=db.holidays.filter(function(h){return h.start<=todayStr&&h.return>=todayStr;});var upcoming=db.holidays.filter(function(h){return h.start>todayStr;}).sort(function(a,b){return a.start.localeCompare(b.start);}).slice(0,4);
+  document.getElementById('holInProgress').textContent='In Progress • '+active.length;document.getElementById('holUpcoming').textContent='Upcoming • '+upcoming.length;
+  document.getElementById('dashHolActive').innerHTML=active.map(function(h){return '<div class="hol-row" style="padding:4px 0"><div class="av" style="width:24px;height:24px;font-size:10px">'+h.cleanerName[0]+'</div><div style="flex:1;font-size:12px;font-weight:600">'+h.cleanerName+'</div><div style="font-size:11px;color:var(--mist)">↩ '+formatDateFI(h.return)+'</div></div>';}).join('');
+  document.getElementById('dashHolUpcoming').innerHTML=upcoming.length?upcoming.map(function(h){var days=Math.ceil((new Date(h.start)-now)/86400000);return '<div class="hol-row" style="padding:4px 0"><div class="av" style="width:24px;height:24px;font-size:10px">'+h.cleanerName[0]+'</div><div style="flex:1;font-size:12px;font-weight:600">'+h.cleanerName+'</div><div style="font-size:11px;color:var(--g600);font-weight:600">'+days+'d</div></div>';}).join(''):'<div style="font-size:12px;color:var(--mist)">No upcoming holidays</div>';
+}
+
+// ══ AI AGENTS ══
+var currentAgent='assistant';
+var agentHistories={assistant:[],sales:[],marketing:[],accounting:[],operations:[]};
+var agentCfg={
+  assistant:{name:'Personal Assistant',emoji:'🤖',sys:'You are the Personal Assistant for SarkerSiivous Oy, a Finnish cleaning company owned by Dipok. Be practical and actionable. Respond in English.'},
+  sales:{name:'Sales Agent',emoji:'📞',sys:'You are the Sales Agent for SarkerSiivous Oy. Write professional Finnish quotes. Client communications in Finnish.'},
+  marketing:{name:'Marketing Agent',emoji:'📣',sys:'You are the Marketing Agent for SarkerSiivous Oy. Create Finnish social media content. Posts in Finnish.'},
+  accounting:{name:'Accounting Agent',emoji:'💰',sys:'You are the Accounting Agent for SarkerSiivous Oy. Finnish tax: ALV 25.5%, YEL, TyEL, viitenumero. Documents in Finnish.'},
+  operations:{name:'Operations Agent',emoji:'👷',sys:'You are the Operations Agent for SarkerSiivous Oy. Manage shifts, tasks. Finnish cleaning checklists in Finnish.'}
+};
+function openAgent(name){
+  currentAgent=name;document.querySelectorAll('.agent-pill').forEach(function(p){p.classList.remove('active');});document.getElementById('pill-'+name).classList.add('active');
+  var cfg=agentCfg[name];document.getElementById('agentTitle').textContent=cfg.emoji+' '+cfg.name;document.getElementById('agentWrap').classList.add('open');
+  if(!agentHistories[name].length){document.getElementById('agentMsgs').innerHTML='';addAgentMsg('ai',cfg.emoji+' '+cfg.name+' ready!');}
+  document.getElementById('agentInput').focus();
+}
+function closeAgent(){document.getElementById('agentWrap').classList.remove('open');document.querySelectorAll('.agent-pill').forEach(function(p){p.classList.remove('active');});}
+function addAgentMsg(role,text){
+  var msgs=document.getElementById('agentMsgs');var div=document.createElement('div');div.className='agent-msg '+role;
+  var av=document.createElement('div');av.className='agent-av';av.textContent=role==='user'?'D':'🤖';
+  var bubble=document.createElement('div');bubble.className='agent-bubble';bubble.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  div.appendChild(av);div.appendChild(bubble);msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function addAgentTyping(){var msgs=document.getElementById('agentMsgs');var div=document.createElement('div');div.className='agent-msg ai';div.id='agentTyping';var av=document.createElement('div');av.className='agent-av';av.textContent='🤖';var bubble=document.createElement('div');bubble.className='agent-bubble';bubble.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';div.appendChild(av);div.appendChild(bubble);msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;}
+function buildAgentContext(){var now=new Date();var m=now.getMonth();var y=now.getFullYear();var ms=db.shifts.filter(function(s){var d=new Date(s.date);return d.getMonth()===m&&d.getFullYear()===y;});var rev=ms.filter(function(s){return s.status==='Completed';}).reduce(function(sum,s){return sum+(s.revenue||0);},0);return '\n\nLIVE DATA: Clients: '+db.clients.length+', Cleaners: '+db.cleaners.length+', Shifts this month: '+ms.length+', Revenue: €'+rev+', Target: €'+(db.profile.targetRevenue||15000);}
+async function sendAgentMsg(){
+  var input=document.getElementById('agentInput');var text=input.value.trim();if(!text)return;
+  input.value='';addAgentMsg('user',text);agentHistories[currentAgent].push({role:'user',content:text});addAgentTyping();
+  try{
+    var cfg=agentCfg[currentAgent];var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:cfg.sys+buildAgentContext(),messages:agentHistories[currentAgent]})});
+    var data=await res.json();var t=document.getElementById('agentTyping');if(t)t.remove();
+    if(data.content&&data.content[0]){var reply=data.content[0].text;agentHistories[currentAgent].push({role:'assistant',content:reply});addAgentMsg('ai',reply);}
+  }catch(e){var t=document.getElementById('agentTyping');if(t)t.remove();addAgentMsg('ai','Connection error. Try again.');}
+}
+
+// ══ REFRESH ══
+function refreshAll(){renderDashboard();renderClients();renderCleaners();renderInvoices();var ap=document.querySelector('.page.active');if(ap){var id=ap.id.replace('page-','');if(id==='shifts')renderCalendar();if(id==='holidays')renderHolidays();if(id==='salary')renderSalary();if(id==='tasks')renderTasks();}}
+
+// ══ INIT ══
+function init(){
+  load();checkSession();
+  var now=new Date();
+  document.getElementById('tbDate').textContent=now.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  document.getElementById('dashSub').textContent="Here's your business overview for "+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('salaryMonth').value=now.getMonth();document.getElementById('salaryYear').value=now.getFullYear();
+  if(!db.tasks)db.tasks=[];
+  var lb=localStorage.getItem('sarkerLastBackup');if(lb)document.getElementById('lastBackupDate').textContent='Last backup: '+lb;
+  if(db.profile&&db.profile.company)document.getElementById('setCompany').value=db.profile.company;
+  if(db.profile&&db.profile.targetRevenue)document.getElementById('setTarget').value=db.profile.targetRevenue;
+  renderCalendar();refreshAll();
+}
+init();
+</script>
+</body>
+</html>
