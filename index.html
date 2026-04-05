@@ -1235,19 +1235,41 @@ var areaActiveOnly=true;
 var editingAreaIdx=-1;
 var currentAreaProfileIdx=-1;
 
-function populateAreaCustomers(){
-  var sel=document.getElementById('aCustomer');
-  sel.innerHTML='<option value="">Select customer...</option>';
-  db.customers.forEach(function(c,i){var o=document.createElement('option');o.value=i;o.textContent=c.name;sel.appendChild(o);});
+function populateAreaCustomers(){}
+
+function showAreaCustDropdown(){filterAreaCustDropdown(document.getElementById('aCustomerSearch').value);}
+function hideAreaCustDropdown(){document.getElementById('aCustDropdown').style.display='none';}
+function filterAreaCustDropdown(q){
+  var dd=document.getElementById('aCustDropdown');
+  var matches=db.customers.filter(function(c){return !q||c.name.toLowerCase().includes(q.toLowerCase());});
+  if(!matches.length){dd.style.display='none';return;}
+  dd.style.display='block';
+  dd.innerHTML='';
+  matches.forEach(function(c){
+    var i=db.customers.indexOf(c);
+    var d=document.createElement('div');
+    d.textContent=c.name;
+    d.style.cssText='padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border2)';
+    d.addEventListener('mouseover',function(){this.style.background='var(--hover)';});
+    d.addEventListener('mouseout',function(){this.style.background='';});
+    d.addEventListener('mousedown',function(e){e.preventDefault();selectAreaCust(i);});
+    dd.appendChild(d);
+  });
+}
+function selectAreaCust(i){
+  document.getElementById('aCustomer').value=i;
+  document.getElementById('aCustomerSearch').value=db.customers[i].name;
+  document.getElementById('aCustDropdown').style.display='none';
 }
 
 function resetAreaForm(){
   editingAreaIdx=-1;
   document.getElementById('areaModalTitle').textContent='New Area';
-  populateAreaCustomers();
+  document.getElementById('aCustomerSearch').value='';
+  document.getElementById('aCustomer').value='';
+  document.getElementById('aCustDropdown').style.display='none';
   ['aName','aFloor','aEntrance','aKeys','aCodes','aParking','aWorkTime','aCleanRoom','aWaste','aWasteRoom'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   ['aMachines','aSanitary','aKitchen','aSafety','aExtra'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('aCustomer').value='';
 }
 
 function saveArea(){
