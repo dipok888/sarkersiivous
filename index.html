@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>SarkerSiivous Business OS v1775379918</title>
+<title>SarkerSiivous Business OS v1775380649</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <script>
 function checkPw(){
@@ -453,15 +453,94 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
 
 <!-- AREAS -->
 <div class="page" id="page-areas">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-    <div><div class="page-title">Area Details</div><div class="page-sub" style="margin-bottom:0">Site-specific information for each cleaning area</div></div>
-    <button class="btn btn-primary" onclick="openModal('addAreaModal')">+ New Area</button>
-  </div>
-  <div class="card">
-    <div class="tbl-wrap">
-      <table class="tbl"><thead><tr><th>Area Name</th><th>Customer</th><th>Floor</th><th>Entrance</th><th>Working Time</th><th>Status</th><th></th></tr></thead>
-      <tbody id="areaTbody"></tbody></table>
+  <div id="areaListView">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div><div class="page-title">Area Details</div><div class="page-sub" style="margin-bottom:0">Site-specific info for each cleaning location</div></div>
+      <button class="btn btn-primary" onclick="openModal('addAreaModal')">+ New Area</button>
     </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <input type="text" placeholder="Search areas..." style="width:200px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none;font-family:'DM Sans',sans-serif" oninput="filterAreaSearch(this.value)">
+      <button class="filter-btn on" id="areaFilterBtn" onclick="toggleAreaFilter()">
+        <span class="f-dot"></span><span id="areaFilterLbl">Active only</span>
+      </button>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table class="tbl"><thead><tr><th>Area Name</th><th>Customer</th><th>Floor</th><th>Working Time</th><th>Status</th><th></th></tr></thead>
+        <tbody id="areaTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="areaProfileView" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-outline btn-sm" onclick="closeAreaProfile()">← Back</button>
+        <div>
+          <div class="page-title" style="margin-bottom:0" id="aprofName"></div>
+          <div style="font-size:12px;color:var(--mist)" id="aprofSub"></div>
+        </div>
+        <span class="badge" id="aprofBadge"></span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm" id="aprofToggleBtn" onclick="toggleCurrentAreaActive()"></button>
+        <button class="btn btn-primary btn-sm" onclick="editCurrentArea()">✏️ Edit</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-head"><div class="card-title">🔑 Access & Entry</div></div>
+      <div class="card-body"><div class="info-grid" id="aprofAccess"></div></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-head"><div class="card-title">🧹 Cleaning Equipment</div></div>
+      <div class="card-body"><div class="info-grid" id="aprofEquip"></div></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-head"><div class="card-title">🧴 Supplies & Waste</div></div>
+      <div class="card-body"><div class="info-grid" id="aprofSupplies"></div></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-head"><div class="card-title">⚠️ Notes & Safety</div></div>
+      <div class="card-body"><div class="info-grid" id="aprofNotes"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- AREA PROFILE -->
+<div class="page" id="page-areaprofile">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-outline btn-sm" onclick="showPage('areas')">← Back</button>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800" id="aprofName"></div>
+        <div style="font-size:12px;color:var(--mist)" id="aprofSub"></div>
+      </div>
+      <span class="badge" id="aprofStatusBadge"></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm" id="aprofToggleBtn" onclick="toggleAreaActive()"></button>
+      <button class="btn btn-outline btn-sm" onclick="editCurrentArea()">✏️ Edit</button>
+    </div>
+  </div>
+
+  <div class="prof-section">
+    <div class="prof-sec-head"><span class="prof-sec-title">Access & Entry</span></div>
+    <div class="info-grid" id="aprofAccess"></div>
+  </div>
+
+  <div class="prof-section">
+    <div class="prof-sec-head"><span class="prof-sec-title">Cleaning Equipment</span></div>
+    <div class="info-grid" id="aprofEquip"></div>
+  </div>
+
+  <div class="prof-section">
+    <div class="prof-sec-head"><span class="prof-sec-title">Supplies & Waste</span></div>
+    <div class="info-grid" id="aprofSupplies"></div>
+  </div>
+
+  <div class="prof-section">
+    <div class="prof-sec-head"><span class="prof-sec-title">Notes & Safety</span></div>
+    <div class="info-grid" id="aprofNotes"></div>
   </div>
 </div>
 
@@ -707,32 +786,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
 
 <!-- ADD AREA -->
 <div class="modal-bg" id="addAreaModal">
-  <div class="modal" style="max-width:560px">
-    <div class="modal-head"><h3>New Area</h3><p>Site-specific cleaning information</p></div>
-    <div class="modal-body">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-head"><h3 id="areaModalTitle">New Area</h3><p>Site-specific cleaning information</p></div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto">
       <div class="form-grid c2" style="margin-bottom:10px">
         <div class="form-group"><label>Area Name *</label><input id="aName" placeholder="e.g. Koy Sigrid"></div>
-        <div class="form-group"><label>Customer *</label><select id="aCustomer"><option value="">Select customer...</option></select></div>
+        <div class="form-group"><label>Customer *</label><select id="aCust"><option value="">Select customer...</option></select></div>
       </div>
-      <div class="form-grid c2" style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mist);padding:6px 0;border-bottom:1px solid var(--border2);margin-bottom:8px">🔑 Access & Entry</div>
+      <div class="form-grid c2" style="margin-bottom:8px">
         <div class="form-group"><label>Floor</label><input id="aFloor" placeholder="e.g. 4. kerros toimisto"></div>
-        <div class="form-group"><label>Entrance</label><input id="aEntrance" placeholder="e.g. Mannerheimintie 12 B pääovelta"></div>
-      </div>
-      <div class="form-grid c2" style="margin-bottom:10px">
-        <div class="form-group"><label>Keys</label><input id="aKeys" placeholder="e.g. 1532 kahdet, lussa avain + nappi"></div>
-        <div class="form-group"><label>Codes</label><input id="aCodes" placeholder="e.g. Securitas 12345"></div>
-      </div>
-      <div class="form-grid c2" style="margin-bottom:10px">
-        <div class="form-group"><label>Parking</label><input id="aParking" placeholder="e.g. kadulta maksullinen"></div>
         <div class="form-group"><label>Working Time</label><input id="aWorkTime" placeholder="e.g. ma-pe klo 17 jälkeen"></div>
       </div>
-      <div class="form-group" style="margin-bottom:10px"><label>Cleaning Room</label><input id="aCleanRoom" placeholder="e.g. sisään tullessa vasemmalla"></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Machines</label><textarea id="aMachines" rows="2" placeholder="e.g. Numatic NSQ36a harjoja, Imuri Sprintus 3 pesikonetta"></textarea></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Sanitary Supplies</label><textarea id="aSanitary" rows="2" placeholder="e.g. Katrin wc-paperi 725142..."></textarea></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Kitchen Supplies</label><textarea id="aKitchen" rows="2" placeholder="Kitchen cleaning supplies..."></textarea></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Waste Recycle</label><input id="aWaste" placeholder="e.g. Kyllä / ei /"></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Safety / Regulations</label><textarea id="aSafety" rows="2" placeholder="Any safety notes..."></textarea></div>
-      <div class="form-group"><label>Additional Notes</label><textarea id="aExtra" rows="2" placeholder="Any other important info..."></textarea></div>
+      <div class="form-group" style="margin-bottom:8px"><label>Entrance</label><input id="aEntrance" placeholder="e.g. Mannerheimintie 12 B pääovelta"></div>
+      <div class="form-grid c2" style="margin-bottom:8px">
+        <div class="form-group"><label>Keys</label><input id="aKeys" placeholder="e.g. 1532 kahdet, lussa avain"></div>
+        <div class="form-group"><label>Codes</label><input id="aCodes" placeholder="e.g. Securitas 12345"></div>
+      </div>
+      <div class="form-grid c2" style="margin-bottom:8px">
+        <div class="form-group"><label>Parking</label><input id="aParking" placeholder="e.g. kadulta maksullinen"></div>
+        <div class="form-group"><label>Cleaning Room</label><input id="aCleanRoom" placeholder="e.g. sisään tullessa vasemmalla"></div>
+      </div>
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mist);padding:6px 0;border-bottom:1px solid var(--border2);margin-bottom:8px">🧹 Equipment & Supplies</div>
+      <div class="form-group" style="margin-bottom:8px"><label>Machines</label><textarea id="aMachines" placeholder="e.g. Numatic NSQ36a harjoja, Imuri Sprintus..."></textarea></div>
+      <div class="form-group" style="margin-bottom:8px"><label>Sanitary Supplies</label><textarea id="aSanitary" placeholder="e.g. Katrin wc-paperi 725142..."></textarea></div>
+      <div class="form-group" style="margin-bottom:8px"><label>Kitchen Supplies</label><textarea id="aKitchen" placeholder="Kitchen cleaning products..."></textarea></div>
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mist);padding:6px 0;border-bottom:1px solid var(--border2);margin-bottom:8px">🗑️ Waste & Safety</div>
+      <div class="form-grid c2" style="margin-bottom:8px">
+        <div class="form-group"><label>Waste Recycle</label><input id="aWaste" placeholder="e.g. Kyllä / ei"></div>
+        <div class="form-group"><label>Waste Room</label><input id="aWasteRoom" placeholder="e.g. 1.krs sijaitsee"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:8px"><label>Safety / Regulations</label><textarea id="aSafety" placeholder="Any safety notes..."></textarea></div>
+      <div class="form-group" style="margin-bottom:8px"><label>Additional Notes</label><textarea id="aExtra" placeholder="Any other important info..."></textarea></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-outline" onclick="closeModal('addAreaModal')">Cancel</button>
@@ -808,6 +893,7 @@ function showPage(id){
   if(id==='customers')renderCustomers();
   if(id==='customerprofile'){}
   if(id==='areas')renderAreas();
+  if(id==='areaprofile'){}
   if(id==='tasks')renderTasks();
   if(id==='events')renderEvents();
   if(id==='dashboard')renderDashboard();
@@ -817,7 +903,7 @@ function showPage(id){
 function openModal(id){
   if(id==='addUserModal'){resetUserForm();setTimeout(handleUserTypeChange,10);}
   if(id==='addCustomerModal'&&editingCustomerIdx<0){resetCustomerForm();}
-  if(id==='addAreaModal'){populateAreaCustomers();}
+  if(id==='addAreaModal'&&editingAreaIdx<0){resetAreaForm();}
   if(id==='addTaskModal'){populateTaskDropdowns();selectedDays=[];}
   document.getElementById(id).classList.add('open');
 }
@@ -1145,42 +1231,154 @@ function renderCustomers(){
 }
 
 // AREAS
+var areaActiveOnly=true;
+var editingAreaIdx=-1;
+var currentAreaProfileIdx=-1;
+
 function populateAreaCustomers(){
   var sel=document.getElementById('aCustomer');
   sel.innerHTML='<option value="">Select customer...</option>';
   db.customers.forEach(function(c,i){var o=document.createElement('option');o.value=i;o.textContent=c.name;sel.appendChild(o);});
-  ['aName','aFloor','aEntrance','aKeys','aCodes','aParking','aWorkTime','aCleanRoom','aSafety','aExtra'].forEach(function(id){document.getElementById(id).value='';});
-  ['aMachines','aSanitary','aKitchen','aWaste'].forEach(function(id){document.getElementById(id).value='';});
 }
+
+function resetAreaForm(){
+  editingAreaIdx=-1;
+  document.getElementById('areaModalTitle').textContent='New Area';
+  populateAreaCustomers();
+  ['aName','aFloor','aEntrance','aKeys','aCodes','aParking','aWorkTime','aCleanRoom','aWaste','aWasteRoom'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['aMachines','aSanitary','aKitchen','aSafety','aExtra'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('aCustomer').value='';
+}
+
 function saveArea(){
   var name=document.getElementById('aName').value.trim();
   var ci=document.getElementById('aCustomer').value;
   if(!name){toast('Area name is required');return;}
-  db.areas.push({
-    id:Date.now(),name:name,customerId:ci>=0?db.customers[ci].id:null,customerName:ci!==''?db.customers[ci].name:'',
-    floor:document.getElementById('aFloor').value,entrance:document.getElementById('aEntrance').value,
-    keys:document.getElementById('aKeys').value,codes:document.getElementById('aCodes').value,
-    parking:document.getElementById('aParking').value,workTime:document.getElementById('aWorkTime').value,
-    cleanRoom:document.getElementById('aCleanRoom').value,machines:document.getElementById('aMachines').value,
-    sanitary:document.getElementById('aSanitary').value,kitchen:document.getElementById('aKitchen').value,
-    waste:document.getElementById('aWaste').value,safety:document.getElementById('aSafety').value,
-    extra:document.getElementById('aExtra').value,active:true
-  });
-  closeModal('addAreaModal');save();toast('Area added!');
+  var wasEditing=editingAreaIdx>=0;
+  var area={
+    id:wasEditing?db.areas[editingAreaIdx].id:Date.now(),
+    name:name,
+    customerId:ci!==''?db.customers[ci].id:null,
+    customerName:ci!==''?db.customers[ci].name:'',
+    floor:document.getElementById('aFloor').value,
+    entrance:document.getElementById('aEntrance').value,
+    keys:document.getElementById('aKeys').value,
+    codes:document.getElementById('aCodes').value,
+    parking:document.getElementById('aParking').value,
+    workTime:document.getElementById('aWorkTime').value,
+    cleanRoom:document.getElementById('aCleanRoom').value,
+    machines:document.getElementById('aMachines').value,
+    sanitary:document.getElementById('aSanitary').value,
+    kitchen:document.getElementById('aKitchen').value,
+    waste:document.getElementById('aWaste').value,
+    wasteRoom:document.getElementById('aWasteRoom').value,
+    safety:document.getElementById('aSafety').value,
+    extra:document.getElementById('aExtra').value,
+    active:wasEditing?db.areas[editingAreaIdx].active:true
+  };
+  if(wasEditing){db.areas[editingAreaIdx]=area;}else{db.areas.push(area);}
+  closeModal('addAreaModal');editingAreaIdx=-1;save();toast(wasEditing?'Area updated!':'Area added!');
 }
+
 function deleteArea(i){if(confirm('Delete this area?')){db.areas.splice(i,1);save();toast('Deleted');}}
+
+function toggleAreaFilter(){
+  areaActiveOnly=!areaActiveOnly;
+  var btn=document.getElementById('areaFilterBtn');
+  if(btn)btn.classList.toggle('on',areaActiveOnly);
+  var lbl=document.getElementById('areaFilterLbl');
+  if(lbl)lbl.textContent=areaActiveOnly?'Active only':'All areas';
+  renderAreas();
+}
+
+function filterAreaSearch(q){
+  document.querySelectorAll('#areaTbody tr').forEach(function(r){
+    r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+
+function openAreaProfile(i){
+  currentAreaProfileIdx=i;
+  var a=db.areas[i];
+  showPage('areaprofile');
+  document.getElementById('aprofName').textContent=a.name;
+  document.getElementById('aprofSub').textContent='Customer: '+(a.customerName||'—');
+  updateAreaStatus(a);
+  document.getElementById('aprofAccess').innerHTML=
+    '<div class="info-item"><label>Floor</label><p>'+(a.floor||'—')+'</p></div>'+
+    '<div class="info-item"><label>Working Time</label><p>'+(a.workTime||'—')+'</p></div>'+
+    '<div class="info-item" style="grid-column:1/-1"><label>Entrance</label><p>'+(a.entrance||'—')+'</p></div>'+
+    '<div class="info-item"><label>Keys</label><p>'+(a.keys||'—')+'</p></div>'+
+    '<div class="info-item"><label>Codes</label><p>'+(a.codes||'—')+'</p></div>'+
+    '<div class="info-item"><label>Parking</label><p>'+(a.parking||'—')+'</p></div>'+
+    '<div class="info-item"><label>Cleaning Room</label><p>'+(a.cleanRoom||'—')+'</p></div>';
+  document.getElementById('aprofEquip').innerHTML=
+    '<div class="info-item" style="grid-column:1/-1"><label>Machines</label><p style="white-space:pre-line">'+(a.machines||'—')+'</p></div>';
+  document.getElementById('aprofSupplies').innerHTML=
+    '<div class="info-item" style="grid-column:1/-1"><label>Sanitary Supplies</label><p style="white-space:pre-line">'+(a.sanitary||'—')+'</p></div>'+
+    '<div class="info-item" style="grid-column:1/-1"><label>Kitchen Supplies</label><p>'+(a.kitchen||'—')+'</p></div>'+
+    '<div class="info-item"><label>Waste Recycle</label><p>'+(a.waste||'—')+'</p></div>'+
+    '<div class="info-item"><label>Waste Room</label><p>'+(a.wasteRoom||'—')+'</p></div>';
+  document.getElementById('aprofNotes').innerHTML=
+    '<div class="info-item" style="grid-column:1/-1"><label>Safety / Regulations</label><p>'+(a.safety||'—')+'</p></div>'+
+    '<div class="info-item" style="grid-column:1/-1"><label>Additional Notes</label><p style="white-space:pre-line">'+(a.extra||'—')+'</p></div>';
+}
+
+function updateAreaStatus(a){
+  var badge=document.getElementById('aprofStatusBadge');
+  var btn=document.getElementById('aprofToggleBtn');
+  if(!badge||!btn)return;
+  if(a.active!==false){
+    badge.className='badge badge-green';badge.textContent='Active';
+    btn.className='btn btn-danger btn-sm';btn.textContent='Set Inactive';
+  } else {
+    badge.className='badge badge-red';badge.textContent='Inactive';
+    btn.className='btn btn-success btn-sm';btn.textContent='Set Active';
+  }
+}
+
+function toggleAreaActive(){
+  if(currentAreaProfileIdx<0)return;
+  db.areas[currentAreaProfileIdx].active=(db.areas[currentAreaProfileIdx].active===false)?true:false;
+  updateAreaStatus(db.areas[currentAreaProfileIdx]);
+  save();toast('Status updated!');
+}
+
+function editCurrentArea(){
+  if(currentAreaProfileIdx<0)return;
+  var a=db.areas[currentAreaProfileIdx];
+  editingAreaIdx=currentAreaProfileIdx;
+  document.getElementById('areaModalTitle').textContent='Edit Area';
+  populateAreaCustomers();
+  document.getElementById('aName').value=a.name||'';
+  var ci=db.customers.findIndex(function(c){return c.id===a.customerId;});
+  document.getElementById('aCustomer').value=ci>=0?ci:'';
+  ['aFloor','aEntrance','aKeys','aCodes','aParking','aWorkTime','aCleanRoom','aMachines','aSanitary','aKitchen','aWaste','aWasteRoom','aSafety','aExtra'].forEach(function(id){
+    var key=id.slice(1).charAt(0).toLowerCase()+id.slice(2);
+    var map={aFloor:'floor',aEntrance:'entrance',aKeys:'keys',aCodes:'codes',aParking:'parking',aWorkTime:'workTime',aCleanRoom:'cleanRoom',aMachines:'machines',aSanitary:'sanitary',aKitchen:'kitchen',aWaste:'waste',aWasteRoom:'wasteRoom',aSafety:'safety',aExtra:'extra'};
+    var el=document.getElementById(id);if(el)el.value=a[map[id]]||'';
+  });
+  openModal('addAreaModal');
+}
+
 function renderAreas(){
   var tbody=document.getElementById('areaTbody');
-  if(!db.areas.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">📍</div><div class="empty-text">No areas yet</div></div></td></tr>';return;}
-  tbody.innerHTML=db.areas.map(function(a,i){
+  if(!tbody)return;
+  var filtered=(db.areas||[]).filter(function(a){return areaActiveOnly?(a.active!==false):true;});
+  if(!filtered.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">📍</div><div class="empty-text">No '+(areaActiveOnly?'active ':'')+'areas yet</div></div></td></tr>';return;}
+  tbody.innerHTML=filtered.map(function(a){
+    var i=db.areas.indexOf(a);
     return '<tr>'+
       '<td><div style="font-weight:600">'+a.name+'</div></td>'+
       '<td style="color:var(--mid)">'+(a.customerName||'—')+'</td>'+
       '<td style="font-size:12px">'+(a.floor||'—')+'</td>'+
-      '<td style="font-size:12px">'+(a.entrance||'—')+'</td>'+
       '<td style="font-size:12px">'+(a.workTime||'—')+'</td>'+
-      '<td><span class="badge '+(c.active===false?'badge-red':'badge-green')+'">'+(c.active===false?'Inactive':'Active')+'</span></td>'+
-      '<td><button class="btn btn-danger btn-sm" onclick="deleteArea('+i+')">Delete</button></td>'+
+      '<td><span class="badge '+(a.active!==false?'badge-green':'badge-red')+'">'+(a.active!==false?'Active':'Inactive')+'</span></td>'+
+      '<td><div style="display:flex;gap:4px">'+
+        '<button class="icon-btn" onclick="openAreaProfile('+i+')">→</button>'+
+        '<button class="btn btn-outline btn-sm" onclick="currentAreaProfileIdx='+i+';editCurrentArea()">✏️</button>'+
+        '<button class="btn btn-danger btn-sm" onclick="deleteArea('+i+')">Delete</button>'+
+      '</div></td>'+
     '</tr>';
   }).join('');
 }
@@ -1354,6 +1552,7 @@ function renderDashboard(){
 }
 
 function refreshAll(){
+  renderAreas();
   var active=document.querySelector('.page.active');
   if(!active)return;
   var id=active.id.replace('page-','');
@@ -1362,6 +1561,7 @@ function refreshAll(){
   else if(id==='customers')renderCustomers();
   if(id==='customerprofile'){}
   else if(id==='areas')renderAreas();
+  if(id==='areaprofile'){}
   else if(id==='tasks')renderTasks();
   else if(id==='events')renderEvents();
 }
@@ -1635,6 +1835,175 @@ function downloadCRM(){
   a.href=url;a.download='index.html';a.click();
   URL.revokeObjectURL(url);
   toast('Downloaded! Now upload to GitHub 🚀');
+}
+
+// ══ AREAS ══
+var areaActiveOnly=true;
+var currentAreaIdx=-1;
+var editingAreaIdx=-1;
+
+function toggleAreaFilter(){
+  areaActiveOnly=!areaActiveOnly;
+  var btn=document.getElementById('areaFilterBtn');
+  btn.classList.toggle('on',areaActiveOnly);
+  document.getElementById('areaFilterLbl').textContent=areaActiveOnly?'Active only':'All areas';
+  renderAreas();
+}
+
+function filterAreaSearch(q){
+  document.querySelectorAll('#areaTbody tr').forEach(function(r){
+    r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+
+function renderAreas(){
+  var tbody=document.getElementById('areaTbody');
+  var filtered=(db.areas||[]).filter(function(a){return areaActiveOnly?(a.active!==false):true;});
+  if(!filtered.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No '+(areaActiveOnly?'active ':'')+'areas yet</div></div></td></tr>';return;}
+  tbody.innerHTML=filtered.map(function(a){
+    var i=(db.areas||[]).indexOf(a);
+    return '<tr>'+
+      '<td><div style="font-weight:600">'+a.name+'</div></td>'+
+      '<td style="color:var(--mist);font-size:12px">'+(a.customer||'—')+'</td>'+
+      '<td style="font-size:12px">'+(a.floor||'—')+'</td>'+
+      '<td style="font-size:12px">'+(a.workTime||'—')+'</td>'+
+      '<td><span class="badge '+(a.active!==false?'green':'red')+'">'+(a.active!==false?'Active':'Inactive')+'</span></td>'+
+      '<td><div style="display:flex;gap:4px">'+
+        '<button class="icon-btn" onclick="openAreaProfile('+i+')">→</button>'+
+        '<button class="btn btn-outline btn-sm" onclick="quickEditArea('+i+')">✏️</button>'+
+      '</div></td>'+
+    '</tr>';
+  }).join('');
+}
+
+function openAreaProfile(i){
+  currentAreaIdx=i;
+  var a=(db.areas||[])[i];
+  document.getElementById('areaListView').style.display='none';
+  document.getElementById('areaProfileView').style.display='block';
+  document.getElementById('aprofName').textContent=a.name;
+  document.getElementById('aprofSub').textContent='Customer: '+(a.customer||'—');
+  updateAreaProfileStatus(a);
+  document.getElementById('aprofAccess').innerHTML=
+    '<div class="info-item"><label>Floor</label><p>'+(a.floor||'—')+'</p></div>'+
+    '<div class="info-item"><label>Working Time</label><p>'+(a.workTime||'—')+'</p></div>'+
+    '<div class="info-item" style="grid-column:1/-1"><label>Entrance</label><p>'+(a.entrance||'—')+'</p></div>'+
+    '<div class="info-item"><label>Keys</label><p style="white-space:pre-line">'+(a.keys||'—')+'</p></div>'+
+    '<div class="info-item"><label>Codes</label><p style="white-space:pre-line">'+(a.codes||'—')+'</p></div>'+
+    '<div class="info-item"><label>Parking</label><p>'+(a.parking||'—')+'</p></div>'+
+    '<div class="info-item"><label>Cleaning Room</label><p>'+(a.cleanRoom||'—')+'</p></div>';
+  document.getElementById('aprofEquip').innerHTML=
+    '<div class="info-item" style="grid-column:1/-1"><label>Machines</label><p style="white-space:pre-line">'+(a.machines||'—')+'</p></div>';
+  document.getElementById('aprofSupplies').innerHTML=
+    '<div class="info-item" style="grid-column:1/-1"><label>Sanitary Supplies</label><p style="white-space:pre-line">'+(a.sanitary||'—')+'</p></div>'+
+    '<div class="info-item" style="grid-column:1/-1"><label>Kitchen Supplies</label><p>'+(a.kitchen||'—')+'</p></div>'+
+    '<div class="info-item"><label>Waste Recycle</label><p>'+(a.waste||'—')+'</p></div>'+
+    '<div class="info-item"><label>Waste Room</label><p>'+(a.wasteRoom||'—')+'</p></div>';
+  document.getElementById('aprofNotes').innerHTML=
+    '<div class="info-item" style="grid-column:1/-1"><label>Safety / Regulations</label><p>'+(a.safety||'—')+'</p></div>'+
+    '<div class="info-item" style="grid-column:1/-1"><label>Additional Notes</label><p style="white-space:pre-line">'+(a.extra||'—')+'</p></div>';
+}
+
+function updateAreaProfileStatus(a){
+  var badge=document.getElementById('aprofBadge');
+  var btn=document.getElementById('aprofToggleBtn');
+  if(a.active!==false){
+    badge.className='badge green';badge.textContent='Active';
+    btn.textContent='Set Inactive';btn.className='btn btn-danger btn-sm';
+  } else {
+    badge.className='badge red';badge.textContent='Inactive';
+    btn.textContent='Set Active';btn.className='btn btn-outline btn-sm';
+  }
+}
+
+function toggleCurrentAreaActive(){
+  var a=(db.areas||[])[currentAreaIdx];
+  a.active=!(a.active!==false);
+  updateAreaProfileStatus(a);
+  save();toast(a.active?'Area set active':'Area set inactive');
+  renderAreas();
+}
+
+function closeAreaProfile(){
+  document.getElementById('areaListView').style.display='block';
+  document.getElementById('areaProfileView').style.display='none';
+}
+
+function populateAreaCustomers(){
+  var sel=document.getElementById('aCust');
+  var cur=sel.value;
+  sel.innerHTML='<option value="">Select customer...</option>';
+  (db.customers||[]).forEach(function(c,i){
+    var o=document.createElement('option');
+    o.value=c.name;o.textContent=c.name;
+    if(c.name===cur)o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+function resetAreaForm(){
+  editingAreaIdx=-1;
+  document.getElementById('areaModalTitle').textContent='New Area';
+  ['aName','aFloor','aWorkTime','aEntrance','aKeys','aCodes','aParking','aCleanRoom','aMachines','aSanitary','aKitchen','aWaste','aWasteRoom','aSafety','aExtra'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  populateAreaCustomers();
+}
+
+function quickEditArea(i){
+  currentAreaIdx=i;
+  editCurrentArea();
+}
+
+function editCurrentArea(){
+  var a=(db.areas||[])[currentAreaIdx];
+  editingAreaIdx=currentAreaIdx;
+  populateAreaCustomers();
+  document.getElementById('areaModalTitle').textContent='Edit Area';
+  document.getElementById('aName').value=a.name||'';
+  document.getElementById('aCust').value=a.customer||'';
+  document.getElementById('aFloor').value=a.floor||'';
+  document.getElementById('aWorkTime').value=a.workTime||'';
+  document.getElementById('aEntrance').value=a.entrance||'';
+  document.getElementById('aKeys').value=a.keys||'';
+  document.getElementById('aCodes').value=a.codes||'';
+  document.getElementById('aParking').value=a.parking||'';
+  document.getElementById('aCleanRoom').value=a.cleanRoom||'';
+  document.getElementById('aMachines').value=a.machines||'';
+  document.getElementById('aSanitary').value=a.sanitary||'';
+  document.getElementById('aKitchen').value=a.kitchen||'';
+  document.getElementById('aWaste').value=a.waste||'';
+  document.getElementById('aWasteRoom').value=a.wasteRoom||'';
+  document.getElementById('aSafety').value=a.safety||'';
+  document.getElementById('aExtra').value=a.extra||'';
+  openModal('addAreaModal');
+}
+
+function saveArea(){
+  var name=document.getElementById('aName').value.trim();
+  if(!name){toast('Area name is required');return;}
+  var a={
+    name:name,customer:document.getElementById('aCust').value,
+    floor:document.getElementById('aFloor').value,workTime:document.getElementById('aWorkTime').value,
+    entrance:document.getElementById('aEntrance').value,keys:document.getElementById('aKeys').value,
+    codes:document.getElementById('aCodes').value,parking:document.getElementById('aParking').value,
+    cleanRoom:document.getElementById('aCleanRoom').value,machines:document.getElementById('aMachines').value,
+    sanitary:document.getElementById('aSanitary').value,kitchen:document.getElementById('aKitchen').value,
+    waste:document.getElementById('aWaste').value,wasteRoom:document.getElementById('aWasteRoom').value,
+    safety:document.getElementById('aSafety').value,extra:document.getElementById('aExtra').value,
+    active:true
+  };
+  if(!db.areas)db.areas=[];
+  var wasEditing=editingAreaIdx>=0;
+  if(wasEditing){a.active=(db.areas[editingAreaIdx].active!==false);db.areas[editingAreaIdx]=a;}
+  else db.areas.push(a);
+  closeModal('addAreaModal');
+  editingAreaIdx=-1;
+  save();toast(wasEditing?'Area updated!':'Area added!');
+  renderAreas();
+  if(wasEditing&&document.getElementById('areaProfileView').style.display!=='none'){
+    openAreaProfile(currentAreaIdx);
+  }
 }
 </script>
 </body>
