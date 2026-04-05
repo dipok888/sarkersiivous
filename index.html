@@ -395,10 +395,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
     <div><div class="page-title">Customers</div><div class="page-sub" style="margin-bottom:0">All cleaning clients</div></div>
     <button class="btn btn-primary" onclick="openModal('addCustomerModal')">+ New Customer</button>
   </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);margin-bottom:14px">
+    <div style="display:flex">
+      <button class="tab active" onclick="switchCustTab('all',this)">All</button>
+      <button class="tab" onclick="switchCustTab('home',this)">🏠 Home</button>
+      <button class="tab" onclick="switchCustTab('office',this)">🏢 Office</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding-bottom:6px">
+      <input type="text" placeholder="Search..." style="width:160px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none;font-family:'DM Sans',sans-serif" oninput="filterCustomers(this.value)">
+      <button class="filter-btn on" id="custFilterBtn" onclick="toggleCustFilter()">
+        <span class="f-dot"></span><span id="custFilterLbl">Active only</span>
+      </button>
+    </div>
+  </div>
   <div class="card">
     <div class="card-head">
-      <div class="card-title">All Customers</div>
-      <input type="text" placeholder="Search..." style="width:180px;padding:5px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;outline:none" oninput="filterTable(this.value,'customerTbody')">
+      <div class="card-title" id="custTableTitle">All Customers</div>
     </div>
     <div class="tbl-wrap">
       <table class="tbl"><thead><tr><th>Name</th><th>Type</th><th>Contact Person</th><th>Phone</th><th>Status</th><th></th></tr></thead>
@@ -458,6 +470,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
     <div><div class="page-title">Tasks</div><div class="page-sub" style="margin-bottom:0">Recurring jobs — auto-generates shifts</div></div>
     <button class="btn btn-primary" onclick="openModal('addTaskModal')">+ New Task</button>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <input type="text" placeholder="Search tasks..." style="width:180px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none;font-family:'DM Sans',sans-serif" oninput="filterTaskSearch(this.value)">
+      <button class="filter-btn on" id="taskFilterBtn" onclick="toggleTaskFilter()">
+        <span class="f-dot"></span><span id="taskFilterLbl">Active only</span>
+      </button>
+    </div>
   </div>
   <div class="card">
     <div class="tbl-wrap">
@@ -1016,6 +1036,31 @@ function toggleProfileActive(){
 
 // CUSTOMERS
 var currentCType='home';
+var custActiveOnly=true;
+var custTab='all';
+
+function toggleCustFilter(){
+  custActiveOnly=!custActiveOnly;
+  var btn=document.getElementById('custFilterBtn');
+  btn.classList.toggle('on',custActiveOnly);
+  document.getElementById('custFilterLbl').textContent=custActiveOnly?'Active only':'All customers';
+  renderCustomers();
+}
+
+function switchCustTab(tab,btn){
+  custTab=tab;
+  document.querySelectorAll('#page-customers .tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  var titles={all:'All Customers',home:'Home Clients',office:'Office Clients'};
+  document.getElementById('custTableTitle').textContent=titles[tab];
+  renderCustomers();
+}
+
+function filterCustomers(q){
+  document.querySelectorAll('#customerTbody tr').forEach(function(r){
+    r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
 var editingCustomerIdx=-1;
 var currentCustomerProfileIdx=-1;
 var pendingContacts=[];
@@ -1218,6 +1263,7 @@ function toggleTask(i){db.tasks[i].active=!db.tasks[i].active;save();toast('Task
 function deleteTask(i){if(confirm('Delete task?')){var t=db.tasks[i];db.shifts=db.shifts.filter(function(s){return s.taskId!==t.id;});db.tasks.splice(i,1);save();toast('Task deleted');}}
 function renderTasks(){
   var tbody=document.getElementById('taskTbody');
+  var allTasks=(db.tasks||[]).filter(function(t){return taskActiveOnly?(t.active!==false):true;});
   if(!db.tasks.length){tbody.innerHTML='<tr><td colspan="9"><div class="empty"><div class="empty-icon">🗂️</div><div class="empty-text">No tasks yet</div></div></td></tr>';return;}
   tbody.innerHTML=db.tasks.map(function(t,i){
     return '<tr>'+
@@ -1546,6 +1592,22 @@ async function sendAgentMsg(){
     var t=document.getElementById('agentTyping');if(t)t.remove();
     if(data.content&&data.content[0]){var reply=data.content[0].text;agentHistories[currentAgent].push({role:'assistant',content:reply});addAgentMsg('ai',reply);}
   }catch(e){var t=document.getElementById('agentTyping');if(t)t.remove();addAgentMsg('ai','Connection error. Try again.');}
+}
+
+var taskActiveOnly=true;
+
+function toggleTaskFilter(){
+  taskActiveOnly=!taskActiveOnly;
+  var btn=document.getElementById('taskFilterBtn');
+  btn.classList.toggle('on',taskActiveOnly);
+  document.getElementById('taskFilterLbl').textContent=taskActiveOnly?'Active only':'All tasks';
+  renderTasks();
+}
+
+function filterTaskSearch(q){
+  document.querySelectorAll('#taskTbody tr').forEach(function(r){
+    r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
 }
 </script>
 </body>
