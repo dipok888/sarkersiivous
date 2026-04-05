@@ -894,7 +894,7 @@ function renderUsers(){
       '<td><div class="heat-row">'+curr+'</div></td>'+
       '<td style="font-size:12px">'+u.phone+'</td>'+
       '<td style="font-size:12px;color:var(--mid)">'+u.email+'</td>'+
-      '<td><button class="icon-btn" onclick="openUserProfile('+ri+')">→</button></td>'+
+      '<td><div style="display:flex;gap:4px"><button class="icon-btn" onclick="openUserProfile('+ri+')">→</button><button class="btn btn-outline btn-sm" onclick="quickEditUser('+ri+')">✏️</button></div></td>'+
     '</tr>';
   }).join('');
 }
@@ -1413,6 +1413,15 @@ function deleteContact(ci,cti){
     renderCustomerProfile(db.customers[ci]);
     toast('Contact deleted');
   }
+}
+
+function quickEditCustomer(i){
+  currentCustomerProfileIdx=i;
+  editCurrentCustomer();
+}
+function quickEditUser(i){
+  currentProfileIdx=i;
+  editCurrentUser();
 }
 </script>
 </body>
