@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SarkerSiivous Business OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script>
+function checkPw(){
+  var pw=document.getElementById('pwInput').value;
+  var stored=localStorage.getItem('ss_pw')||'sarker2025';
+  if(pw===stored||pw==='sarker2025'){
+    document.getElementById('pwScreen').style.display='none';
+    localStorage.setItem('ss_session',String(Date.now()));
+    localStorage.setItem('ss_pw',stored);
+  } else {
+    document.getElementById('pwError').style.display='block';
+    document.getElementById('pwInput').value='';
+  }
+}
+function checkSession(){
+  var s=localStorage.getItem('ss_session');
+  if(s&&(Date.now()-parseInt(s))/3600000<8)
+    document.getElementById('pwScreen').style.display='none';
+}
+</script>
+<style>
+:root{
+  --g900:#052e16;--g800:#064e3b;--g700:#065f46;--g600:#047857;--g500:#059669;
+  --g400:#10b981;--g300:#34d399;--g100:#d1fae5;--g50:#ecfdf5;
+  --w:#fff;--snow:#f8fafc;--slate:#0f172a;--mid:#475569;--mist:#94a3b8;
+  --border:#e2e8f0;--border2:#f1f5f9;
+  --red:#ef4444;--red50:#fef2f2;--red100:#fee2e2;--red800:#991b1b;
+  --blue:#3b82f6;--blue50:#eff6ff;--blue100:#dbeafe;--blue800:#1e40af;
+  --gold:#f59e0b;--gold50:#fffbeb;--gold100:#fef3c7;--gold800:#92400e;
+  --sb:220px;--tb:58px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);font-size:14px;min-height:100vh}
+
+/* PASSWORD */
+.pw-screen{position:fixed;inset:0;background:var(--g800);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+.pw-logo{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;text-align:center}
+.pw-logo span{display:block;font-size:13px;font-weight:400;color:var(--g300);margin-top:4px}
+.pw-box{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:32px;width:300px;text-align:center}
+.pw-box h3{font-family:'Syne',sans-serif;color:#fff;font-size:15px;margin-bottom:14px}
+.pw-input{width:100%;padding:11px;border-radius:9px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:15px;text-align:center;letter-spacing:3px;outline:none;margin-bottom:10px;font-family:'DM Sans',sans-serif}
+.pw-btn{width:100%;padding:11px;background:var(--g500);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+.pw-error{color:#fca5a5;font-size:12px;margin-top:6px;display:none}
+.pw-hint{color:rgba(255,255,255,.4);font-size:11px;margin-top:10px}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--tb);background:var(--g800);display:flex;align-items:center;padding:0 20px;gap:14px;z-index:200}
+.tb-logo{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff}
+.tb-logo span{color:var(--g300);font-weight:400;font-size:11px;display:block;margin-top:-2px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tb-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:4px 12px;font-size:12px;color:rgba(255,255,255,.8)}
+.tb-chip strong{color:#fff}
+.tb-av{width:30px;height:30px;border-radius:50%;background:var(--g500);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#fff}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:var(--tb);left:0;bottom:0;width:var(--sb);background:var(--w);border-right:1px solid var(--border);overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sb-section{padding:12px 10px 4px}
+.sb-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--mist);padding:0 8px;margin-bottom:3px}
+.sb-btn{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--mid);transition:all .15s;text-align:left;margin-bottom:1px}
+.sb-btn:hover{background:var(--g50);color:var(--g700)}
+.sb-btn.active{background:var(--g100);color:var(--g800);font-weight:600}
+.sb-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--snow);flex-shrink:0}
+.sb-btn.active .sb-icon{background:var(--g700)}
+.sb-div{height:1px;background:var(--border2);margin:6px 10px}
+
+/* MAIN */
+.main{margin-left:var(--sb);margin-top:var(--tb);min-height:calc(100vh - var(--tb));padding:24px}
+
+/* PAGES */
+.page{display:none}
+.page.active{display:block}
+
+/* TYPOGRAPHY */
+.page-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--g900)}
+.page-sub{font-size:13px;color:var(--mist);margin-top:2px;margin-bottom:18px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+
+/* CARDS */
+.card{background:var(--w);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.card-head{padding:12px 16px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--slate)}
+.card-body{padding:14px 16px}
+
+/* BUTTONS */
+.btn{padding:7px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--g700);color:#fff}
+.btn-primary:hover{background:var(--g800)}
+.btn-outline{background:transparent;color:var(--g700);border:1px solid var(--g100)}
+.btn-outline:hover{background:var(--g50)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-danger{background:var(--red100);color:var(--red800);border:none}
+.btn-danger:hover{background:#fecaca}
+.btn-success{background:var(--g100);color:var(--g800);border:none}
+.btn-success:hover{background:var(--g300)}
+.icon-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--w);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:var(--mid)}
+.icon-btn:hover{background:var(--snow);color:var(--slate)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-green{background:var(--g100);color:var(--g700)}
+.badge-red{background:var(--red100);color:var(--red800)}
+.badge-blue{background:var(--blue100);color:var(--blue800)}
+.badge-gold{background:var(--gold100);color:var(--gold800)}
+.badge-gray{background:var(--border2);color:var(--mid)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mist);padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2);white-space:nowrap}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border2);font-size:13px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--g50)}
+.tbl tr.inactive-row td{opacity:.4}
+
+/* AVATAR */
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;font-family:'Syne',sans-serif}
+.av-green{background:var(--g100);color:var(--g700)}
+.av-blue{background:var(--blue100);color:var(--blue800)}
+.av-lg{width:42px;height:42px;font-size:16px}
+
+/* HEAT */
+.heat-row{display:flex;gap:2px}
+.heat-cell{width:13px;height:13px;border-radius:2px}
+
+/* TABS */
+.tab-row{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);margin-bottom:14px}
+.tab-group{display:flex}
+.tab{padding:7px 16px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;color:var(--mist);background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;font-weight:500}
+.tab.active{color:var(--slate);border-bottom-color:var(--slate)}
+.tab-actions{display:flex;align-items:center;gap:8px;padding-bottom:6px}
+
+/* FILTER BTN */
+.filter-btn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mist);padding:5px 11px;border-radius:16px;border:1px solid var(--border);cursor:pointer;background:var(--w);font-family:'DM Sans',sans-serif}
+.filter-btn.on{background:var(--g50);border-color:var(--g300);color:var(--g700)}
+.f-dot{width:6px;height:6px;border-radius:50%;background:var(--border);display:inline-block}
+.filter-btn.on .f-dot{background:var(--g500)}
+
+/* FORM */
+.form-group{margin-bottom:10px}
+.form-group label{font-size:11px;font-weight:600;color:var(--mid);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--slate);outline:none;background:var(--w)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--g500)}
+.form-grid{display:grid;gap:10px}
+.form-grid.c2{grid-template-columns:1fr 1fr}
+.form-grid.c3{grid-template-columns:1fr 1fr 1fr}
+.sec-lbl{font-size:11px;font-weight:600;color:var(--mist);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 4px;border-bottom:1px solid var(--border2);margin-bottom:6px}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.modal-bg.open{display:flex}
+.modal{background:var(--w);border-radius:14px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto}
+.modal-head{padding:18px 22px 12px;border-bottom:1px solid var(--border2)}
+.modal-head h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:800}
+.modal-head p{font-size:12px;color:var(--mist);margin-top:2px}
+.modal-body{padding:18px 22px;max-height:65vh;overflow-y:auto}
+.modal-foot{padding:12px 22px;border-top:1px solid var(--border2);display:flex;gap:8px;justify-content:flex-end}
+
+/* PROFILE */
+.prof-section{background:var(--w);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+.prof-sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border2)}
+.prof-sec-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 16px}
+.info-item label{font-size:11px;color:var(--mist);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:2px}
+.info-item p{font-size:13px;color:var(--slate)}
+.months-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-top:6px}
+.month-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.month-bar{height:50px;width:100%;position:relative;border-radius:3px;background:var(--border2)}
+.month-fill{position:absolute;bottom:0;left:0;right:0;border-radius:3px;background:var(--g600)}
+.month-lbl{font-size:9px;color:var(--mist);text-align:center}
+.month-val{font-size:9px;color:var(--mist);text-align:center;min-height:11px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--g800);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;z-index:999;transform:translateY(60px);opacity:0;transition:all .25s}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* EMPTY */
+.empty{text-align:center;padding:36px 20px;color:var(--mist)}
+.empty-icon{font-size:36px;margin-bottom:8px;opacity:.5}
+.empty-text{font-size:13px}
+
+/* LANG CHECKS */
+.lang-row{display:flex;gap:16px;margin-top:4px}
+.lang-check{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--slate)}
+.lang-check input{width:auto;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD -->
+<div class="pw-screen" id="pwScreen">
+  <div class="pw-logo">🧹 SarkerSiivous<span>Business OS — Secure Access</span></div>
+  <div class="pw-box">
+    <h3>Enter your password</h3>
+    <input class="pw-input" type="password" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="pw-btn" onclick="checkPw()">Unlock →</button>
+    <div class="pw-error" id="pwError">Wrong password. Try again.</div>
+    <div class="pw-hint">Default: sarker2025</div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div style="font-size:20px">🧹</div>
+  <div class="tb-logo">SarkerSiivous<span>Business OS</span></div>
+  <div class="tb-right">
+    <div class="tb-chip" id="tbDate"></div>
+    <div class="tb-chip">Revenue: <strong id="tbRevenue">€0</strong></div>
+    <div class="tb-av">D</div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-section">
+    <div class="sb-lbl">Main</div>
+    <button class="sb-btn active" onclick="showPage('dashboard')" data-page="dashboard"><div class="sb-icon">📊</div><span>Dashboard</span></button>
+    <button class="sb-btn" onclick="showPage('customers')" data-page="customers"><div class="sb-icon">🏢</div><span>Customers</span></button>
+    <button class="sb-btn" onclick="showPage('areas')" data-page="areas"><div class="sb-icon">📍</div><span>Area Details</span></button>
+    <button class="sb-btn" onclick="showPage('tasks')" data-page="tasks"><div class="sb-icon">🗂️</div><span>Tasks</span></button>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-section">
+    <div class="sb-lbl">People</div>
+    <button class="sb-btn" onclick="showPage('users')" data-page="users"><div class="sb-icon">👷</div><span>Users</span></button>
+    <button class="sb-btn" onclick="showPage('events')" data-page="events"><div class="sb-icon">🏖️</div><span>Events</span></button>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-section">
+    <div class="sb-lbl">Operations</div>
+    <button class="sb-btn" onclick="showPage('shifts')" data-page="shifts"><div class="sb-icon">📅</div><span>Shifts</span></button>
+    <button class="sb-btn" onclick="showPage('reimburse')" data-page="reimburse"><div class="sb-icon">💸</div><span>Reimb. & Deductions</span></button>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-section">
+    <div class="sb-lbl">Finance</div>
+    <button class="sb-btn" onclick="showPage('payrolls')" data-page="payrolls"><div class="sb-icon">💶</div><span>Payrolls</span></button>
+    <button class="sb-btn" onclick="showPage('invoices')" data-page="invoices"><div class="sb-icon">🧾</div><span>Invoices</span></button>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-section">
+    <button class="sb-btn" onclick="showPage('settings')" data-page="settings"><div class="sb-icon">⚙️</div><span>Settings</span></button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-title">Good morning, Dipok 👋</div>
+  <div class="page-sub" id="dashSub">Loading...</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+    <div class="card" style="margin-bottom:0"><div class="card-body"><div style="font-size:11px;color:var(--mist);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Customers</div><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--g800);margin-top:4px" id="dCustomers">0</div></div></div>
+    <div class="card" style="margin-bottom:0"><div class="card-body"><div style="font-size:11px;color:var(--mist);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Active Users</div><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--blue800);margin-top:4px" id="dUsers">0</div></div></div>
+    <div class="card" style="margin-bottom:0"><div class="card-body"><div style="font-size:11px;color:var(--mist);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Shifts This Month</div><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--slate);margin-top:4px" id="dShifts">0</div></div></div>
+    <div class="card" style="margin-bottom:0"><div class="card-body"><div style="font-size:11px;color:var(--mist);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Revenue This Month</div><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--gold800);margin-top:4px" id="dRevenue">€0</div></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="card"><div class="card-head"><div class="card-title">Recent Users</div></div><div class="card-body" id="dashUsers"><div class="empty"><div class="empty-icon">👷</div><div class="empty-text">No users yet</div></div></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">Recent Customers</div></div><div class="card-body" id="dashCustomers"><div class="empty"><div class="empty-icon">🏢</div><div class="empty-text">No customers yet</div></div></div></div>
+  </div>
+</div>
+
+<!-- USERS -->
+<div class="page" id="page-users">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div><div class="page-title">Users</div><div class="page-sub" style="margin-bottom:0">Cleaners & subcontractors</div></div>
+    <button class="btn btn-primary" onclick="openModal('addUserModal')">+ New User</button>
+  </div>
+
+  <div class="tab-row">
+    <div class="tab-group">
+      <button class="tab active" onclick="switchUserTab('Employee',this)" id="utab-Employee">Employee</button>
+      <button class="tab" onclick="switchUserTab('Subcontractor',this)" id="utab-Subcontractor">Subcontractor</button>
+      <button class="tab" onclick="switchUserTab('Staff',this)" id="utab-Staff">Staff</button>
+    </div>
+    <div class="tab-actions">
+      <input type="text" placeholder="Search..." style="width:160px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none" oninput="filterUsers(this.value)">
+      <button class="filter-btn on" id="userFilterBtn" onclick="toggleUserFilter()">
+        <span class="f-dot"></span><span id="userFilterLbl">Active only</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tbl-wrap">
+      <table class="tbl" id="userTable">
+        <thead><tr>
+          <th>User</th><th>Full Name</th><th>Lang</th>
+          <th id="th-prev-year">2025</th><th id="th-curr-year">2026</th>
+          <th>Phone</th><th>Email</th><th></th>
+        </tr></thead>
+        <tbody id="userTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- USER PROFILE -->
+<div class="page" id="page-userprofile">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-outline btn-sm" onclick="showPage('users')">← Back</button>
+      <div class="av av-green av-lg" id="profAvatar"></div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800" id="profFullName"></div>
+        <div style="font-size:12px;color:var(--mist)" id="profSubtitle"></div>
+      </div>
+      <span class="badge" id="profStatusBadge"></span>
+    </div>
+    <button class="btn btn-sm" id="profToggleBtn" onclick="toggleProfileActive()"></button>
+  </div>
+
+  <div class="prof-section">
+    <div class="prof-sec-head"><span class="prof-sec-title">Details</span><button class="icon-btn" onclick="editCurrentUser()">✏️</button></div>
+    <div class="info-grid" id="profDetails"></div>
+  </div>
+
+  <div class="prof-section">
+    <div class="prof-sec-head"><span class="prof-sec-title" id="profHoursTitle">Hours overview</span></div>
+    <div class="months-grid" id="profMonthsChart"></div>
+    <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-top:4px" id="profMonthsLabels"></div>
+  </div>
+
+  <div class="prof-section">
+    <div class="prof-sec-head"><span class="prof-sec-title">Salary rates</span><button class="icon-btn" onclick="editCurrentUser()">✏️</button></div>
+    <div class="info-grid" id="profSalary"></div>
+  </div>
+</div>
+
+<!-- CUSTOMERS -->
+<div class="page" id="page-customers">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div><div class="page-title">Customers</div><div class="page-sub" style="margin-bottom:0">All cleaning clients</div></div>
+    <button class="btn btn-primary" onclick="openModal('addCustomerModal')">+ New Customer</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">All Customers</div>
+      <input type="text" placeholder="Search..." style="width:180px;padding:5px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;outline:none" oninput="filterTable(this.value,'customerTbody')">
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl"><thead><tr><th>Name</th><th>Type</th><th>City</th><th>Contact Person</th><th>Phone</th><th>Status</th><th></th></tr></thead>
+      <tbody id="customerTbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER PROFILE -->
+<div class="page" id="page-customerprofile">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-outline btn-sm" onclick="showPage('customers')">← Back</button>
+      <div class="av av-green av-lg" id="cprofAvatar"></div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800" id="cprofName"></div>
+        <div style="font-size:12px;color:var(--mist)" id="cprofSub"></div>
+      </div>
+      <span class="badge" id="cprofStatusBadge"></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm" id="cprofToggleBtn" onclick="toggleCustomerActive()"></button>
+      <button class="btn btn-outline btn-sm" onclick="editCurrentCustomer()">✏️ Edit</button>
+    </div>
+  </div>
+
+  <div class="prof-section">
+    <div class="prof-sec-head"><span class="prof-sec-title">Details</span></div>
+    <div class="info-grid" id="cprofDetails"></div>
+  </div>
+
+  <div class="prof-section">
+    <div class="prof-sec-head">
+      <span class="prof-sec-title">Contact Persons</span>
+      <button class="icon-btn" onclick="openAddContact()">+</button>
+    </div>
+    <div id="cprofContacts"></div>
+  </div>
+</div>
+
+<!-- AREAS -->
+<div class="page" id="page-areas">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div><div class="page-title">Area Details</div><div class="page-sub" style="margin-bottom:0">Site-specific information for each cleaning area</div></div>
+    <button class="btn btn-primary" onclick="openModal('addAreaModal')">+ New Area</button>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table class="tbl"><thead><tr><th>Area Name</th><th>Customer</th><th>Floor</th><th>Entrance</th><th>Working Time</th><th>Status</th><th></th></tr></thead>
+      <tbody id="areaTbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div class="page" id="page-tasks">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div><div class="page-title">Tasks</div><div class="page-sub" style="margin-bottom:0">Recurring jobs — auto-generates shifts</div></div>
+    <button class="btn btn-primary" onclick="openModal('addTaskModal')">+ New Task</button>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table class="tbl"><thead><tr><th>Task</th><th>Customer</th><th>Area</th><th>Price</th><th>Days</th><th>Cycle</th><th>Assigned To</th><th>Status</th><th></th></tr></thead>
+      <tbody id="taskTbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- EVENTS -->
+<div class="page" id="page-events">
+  <div class="page-title">Events</div>
+  <div class="page-sub">Holidays, sick leave and public holidays</div>
+  <div class="tab-row" style="margin-bottom:16px">
+    <div class="tab-group">
+      <button class="tab active" onclick="switchEventTab('holiday',this)">Holiday</button>
+      <button class="tab" onclick="switchEventTab('sickleave',this)">Sick Leave</button>
+      <button class="tab" onclick="switchEventTab('publicholiday',this)">Public Holiday</button>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="addEventItem()" id="addEventBtn">+ Add</button>
+  </div>
+  <div id="eventContent"></div>
+</div>
+
+<!-- SHIFTS -->
+<div class="page" id="page-shifts">
+  <div class="page-title">Shifts</div>
+  <div class="page-sub">The most important part — all scheduled work</div>
+  <div style="background:var(--g50);border:1px solid var(--g100);border-radius:10px;padding:20px;text-align:center;color:var(--g700)">
+    <div style="font-size:24px;margin-bottom:8px">📅</div>
+    <div style="font-weight:600">Shifts module coming next session</div>
+    <div style="font-size:12px;color:var(--mist);margin-top:4px">Will be built after Customers and Areas are complete</div>
+  </div>
+</div>
+
+<!-- REIMBURSEMENTS -->
+<div class="page" id="page-reimburse">
+  <div class="page-title">Reimbursements & Deductions</div>
+  <div class="page-sub">Track payments and deductions for your team</div>
+  <div style="background:var(--g50);border:1px solid var(--g100);border-radius:10px;padding:20px;text-align:center;color:var(--g700)">
+    <div style="font-size:24px;margin-bottom:8px">💸</div>
+    <div style="font-weight:600">Coming in next session</div>
+  </div>
+</div>
+
+<!-- PAYROLLS -->
+<div class="page" id="page-payrolls">
+  <div class="page-title">Payrolls</div>
+  <div class="page-sub">Salary calculations for your team</div>
+  <div style="background:var(--g50);border:1px solid var(--g100);border-radius:10px;padding:20px;text-align:center;color:var(--g700)">
+    <div style="font-size:24px;margin-bottom:8px">💶</div>
+    <div style="font-weight:600">Coming in next session</div>
+  </div>
+</div>
+
+<!-- INVOICES -->
+<div class="page" id="page-invoices">
+  <div class="page-title">Invoices</div>
+  <div class="page-sub">Finnish ALV 25.5% — Viitenumero included</div>
+  <div style="background:var(--g50);border:1px solid var(--g100);border-radius:10px;padding:20px;text-align:center;color:var(--g700)">
+    <div style="font-size:24px;margin-bottom:8px">🧾</div>
+    <div style="font-weight:600">Coming in next session</div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-title">Settings</div>
+  <div class="page-sub">Company profile and security</div>
+  <div class="prof-section" style="max-width:500px">
+    <div class="prof-sec-head"><span class="prof-sec-title">Company Profile</span></div>
+    <div class="form-grid c2" style="margin-bottom:10px">
+      <div class="form-group"><label>Company Name</label><input id="setCompany" value="SarkerSiivous Oy"></div>
+      <div class="form-group"><label>Y-tunnus</label><input id="setYtunnus" value="3426720-5"></div>
+    </div>
+    <div class="form-grid c2" style="margin-bottom:10px">
+      <div class="form-group"><label>Phone</label><input id="setPhone" placeholder="+358 40 123 4567"></div>
+      <div class="form-group"><label>Email</label><input id="setEmail" placeholder="info@sarkersiivous.fi"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:10px"><label>IBAN</label><input id="setIban" placeholder="FI12 3456 7890 1234 56"></div>
+    <button class="btn btn-primary" onclick="saveSettings()">Save ✓</button>
+  </div>
+  <div class="prof-section" style="max-width:500px;margin-top:12px">
+    <div class="prof-sec-head"><span class="prof-sec-title">Change Password</span></div>
+    <div class="form-grid c2" style="margin-bottom:10px">
+      <div class="form-group"><label>New Password</label><input type="password" id="setPwNew"></div>
+      <div class="form-group"><label>Confirm</label><input type="password" id="setPwConfirm"></div>
+    </div>
+    <button class="btn btn-primary" onclick="changePassword()">Change Password</button>
+  </div>
+  <div class="prof-section" style="max-width:500px;margin-top:12px">
+    <div class="prof-sec-head"><span class="prof-sec-title">Data</span></div>
+    <button class="btn btn-outline" onclick="exportData()">📥 Export Backup</button>
+  </div>
+</div>
+
+</main>
+
+<!-- MODALS -->
+
+<!-- ADD USER -->
+<div class="modal-bg" id="addUserModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="addUserTitle">New User</h3><p>Add a cleaner or subcontractor</p></div>
+    <div class="modal-body">
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Nickname *</label><input id="uNick" placeholder="e.g. Fatima"></div>
+        <div class="form-group"><label>Worker Type *</label>
+          <select id="uType" onchange="handleUserTypeChange()">
+            <option value="Employee">Employee</option>
+            <option value="Subcontractor">Subcontractor</option>
+            <option value="Staff">Staff</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>First Name *</label><input id="uFname" placeholder="Fatima"></div>
+        <div class="form-group"><label>Last Name *</label><input id="uLname" placeholder="Rahman"></div>
+      </div>
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Phone</label><input id="uPhone" placeholder="+358 40 123 4567"></div>
+        <div class="form-group"><label>Email</label><input id="uEmail" placeholder="fatima@email.fi"></div>
+      </div>
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Address</label><input id="uAddr" placeholder="Street, City"></div>
+        <div class="form-group"><label>Birthday</label><input type="date" id="uBday"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>Start Date</label><input type="date" id="uSdate"></div>
+      <div style="margin-bottom:10px">
+        <div class="sec-lbl">Languages</div>
+        <div class="lang-row">
+          <label class="lang-check"><input type="checkbox" id="uLangFi"> 🇫🇮 Finnish</label>
+          <label class="lang-check"><input type="checkbox" id="uLangEn"> 🇬🇧 English</label>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div class="sec-lbl">Salary</div>
+        <div class="form-grid c3" style="margin-bottom:8px">
+          <div class="form-group" id="taxWrap" style="display:block"><label>Tax Card %</label><input type="number" id="uTax" placeholder="25" step="0.5"></div>
+          <div class="form-group"><label>Morning €/h</label><input type="number" id="uRateM" placeholder="11.80" step="0.01"></div>
+          <div class="form-group"><label>Evening €/h</label><input type="number" id="uRateE" placeholder="12.53" step="0.01"></div>
+        </div>
+        <div class="form-grid c2">
+          <div class="form-group"><label>IBAN</label><input id="uIban" placeholder="FI12 3456 7890 1234 56"></div>
+          <div class="form-group" id="ytunWrap" style="display:none"><label>Y-tunnus</label><input id="uYtun" placeholder="1234567-8"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUser()">Save User ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CUSTOMER -->
+<div class="modal-bg" id="addCustomerModal">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-head"><h3 id="custModalTitle">New Customer</h3><p>Add a home or office client</p></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Client Type *</label>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button type="button" class="btn btn-primary btn-sm" id="ctHome" onclick="setCType('home')">🏠 Home</button>
+          <button type="button" class="btn btn-outline btn-sm" id="ctOffice" onclick="setCType('office')">🏢 Office</button>
+        </div>
+      </div>
+      <div id="cHomeFields">
+        <div class="form-grid c2" style="margin-bottom:10px">
+          <div class="form-group"><label>Full Name *</label><input id="cName" placeholder="e.g. Matti Virtanen"></div>
+          <div class="form-group"><label>Phone</label><input id="cPhone" placeholder="+358 40 123 4567"></div>
+        </div>
+        <div class="form-grid c2" style="margin-bottom:10px">
+          <div class="form-group"><label>Email</label><input id="cEmail" placeholder="matti@email.fi"></div>
+          <div class="form-group"><label>City</label><input id="cCity" placeholder="e.g. Espoo"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px"><label>Address</label><input id="cAddr" placeholder="e.g. Mannerheimintie 5 A 12"></div>
+      </div>
+      <div id="cOfficeFields" style="display:none">
+        <div class="form-grid c2" style="margin-bottom:10px">
+          <div class="form-group"><label>Company Name *</label><input id="cCompany" placeholder="e.g. Hypergene Oy"></div>
+          <div class="form-group"><label>Y-tunnus</label><input id="cCompanyYtun" placeholder="1234567-8"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px"><label>Address</label><input id="cAddrOffice" placeholder="e.g. Aleksanterinkatu 48B, Helsinki"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Cancellation Period</label><select id="cCancel"><option value="">Not specified</option><option value="1 month">1 month</option><option value="2 months">2 months</option><option value="3 months">3 months</option></select></div>
+        <div style="margin-bottom:10px">
+          <div style="font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.5px;padding:4px 0;border-bottom:1px solid var(--border2);margin-bottom:8px">Contact Persons</div>
+          <div id="contactInputsList"></div>
+          <button type="button" onclick="addContactInput()" style="font-size:12px;color:var(--g700);background:none;border:none;cursor:pointer;padding:4px 0;font-family:'DM Sans',sans-serif">+ Add contact person</button>
+        </div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="cNotes" rows="2" placeholder="Any notes..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('addCustomerModal');editingCustomerIdx=-1;">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCustomer()">Save Customer ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CONTACT MODAL -->
+<div class="modal-bg" id="addContactModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h3>Add Contact Person</h3></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:10px"><label>Name *</label><input id="acName" placeholder="Contact name"></div>
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Phone</label><input id="acPhone" placeholder="+358 40 123 4567"></div>
+        <div class="form-group"><label>Email</label><input id="acEmail" placeholder="email@company.fi"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('addContactModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveContact()">Save Contact ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD AREA -->
+<div class="modal-bg" id="addAreaModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head"><h3>New Area</h3><p>Site-specific cleaning information</p></div>
+    <div class="modal-body">
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Area Name *</label><input id="aName" placeholder="e.g. Koy Sigrid"></div>
+        <div class="form-group"><label>Customer *</label><select id="aCustomer"><option value="">Select customer...</option></select></div>
+      </div>
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Floor</label><input id="aFloor" placeholder="e.g. 4. kerros toimisto"></div>
+        <div class="form-group"><label>Entrance</label><input id="aEntrance" placeholder="e.g. Mannerheimintie 12 B pääovelta"></div>
+      </div>
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Keys</label><input id="aKeys" placeholder="e.g. 1532 kahdet, lussa avain + nappi"></div>
+        <div class="form-group"><label>Codes</label><input id="aCodes" placeholder="e.g. Securitas 12345"></div>
+      </div>
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Parking</label><input id="aParking" placeholder="e.g. kadulta maksullinen"></div>
+        <div class="form-group"><label>Working Time</label><input id="aWorkTime" placeholder="e.g. ma-pe klo 17 jälkeen"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>Cleaning Room</label><input id="aCleanRoom" placeholder="e.g. sisään tullessa vasemmalla"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Machines</label><textarea id="aMachines" rows="2" placeholder="e.g. Numatic NSQ36a harjoja, Imuri Sprintus 3 pesikonetta"></textarea></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Sanitary Supplies</label><textarea id="aSanitary" rows="2" placeholder="e.g. Katrin wc-paperi 725142..."></textarea></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Kitchen Supplies</label><textarea id="aKitchen" rows="2" placeholder="Kitchen cleaning supplies..."></textarea></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Waste Recycle</label><input id="aWaste" placeholder="e.g. Kyllä / ei /"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Safety / Regulations</label><textarea id="aSafety" rows="2" placeholder="Any safety notes..."></textarea></div>
+      <div class="form-group"><label>Additional Notes</label><textarea id="aExtra" rows="2" placeholder="Any other important info..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('addAreaModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveArea()">Save Area ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TASK -->
+<div class="modal-bg" id="addTaskModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head"><h3>New Task</h3><p>Recurring job — auto-generates shifts</p></div>
+    <div class="modal-body">
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Customer *</label><select id="tCustomer" onchange="filterTaskAreas()"><option value="">Select customer...</option></select></div>
+        <div class="form-group"><label>Area *</label><select id="tArea"><option value="">Select area...</option></select></div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>Task Name (auto-filled)</label><div id="tNameDisplay" style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;background:var(--snow);font-size:13px;color:var(--mist)">Select customer & area first</div></div>
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Hours per visit *</label><input type="number" id="tHours" step="0.25" placeholder="2.5"></div>
+        <div class="form-group"><label>Earnings per shift (€) *</label><input type="number" id="tEarnings" step="0.5" placeholder="32.65" oninput="calcTaskRate()"></div>
+      </div>
+      <div id="tRateBox" style="display:none;padding:8px 11px;background:var(--g50);border-radius:7px;font-size:12px;color:var(--g700);margin-bottom:10px"></div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Days of Week *</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="daySelector">
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleDay(this,'Mon')">Mon</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleDay(this,'Tue')">Tue</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleDay(this,'Wed')">Wed</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleDay(this,'Thu')">Thu</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleDay(this,'Fri')">Fri</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleDay(this,'Sat')">Sat</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleDay(this,'Sun')">Sun</button>
+        </div>
+      </div>
+      <div class="form-grid c2" style="margin-bottom:10px">
+        <div class="form-group"><label>Cycle</label><select id="tCycle"><option>Weekly</option><option>Bi-weekly</option><option>Monthly</option></select></div>
+        <div class="form-group"><label>Assign User</label><select id="tUser"><option value="">Unassigned</option></select></div>
+      </div>
+      <div class="form-grid c2">
+        <div class="form-group"><label>Start Date *</label><input type="date" id="tStart"></div>
+        <div class="form-group"><label>Generate For</label><select id="tMonths"><option value="1">1 month</option><option value="2">2 months</option><option value="3" selected>3 months</option></select></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('addTaskModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTask()">Save & Generate Shifts →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var STORE='ss_v1';
+var db={users:[],customers:[],areas:[],tasks:[],shifts:[],events:[],settings:{}};
+
+function load(){
+  try{var s=localStorage.getItem(STORE);if(s)db=Object.assign({users:[],customers:[],areas:[],tasks:[],shifts:[],events:[],settings:{}},JSON.parse(s));}catch(e){}
+}
+function save(){localStorage.setItem(STORE,JSON.stringify(db));refreshAll();}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
+function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function formatDate(s){if(!s)return '—';var p=s.split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:s;}
+
+// NAVIGATION
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.sb-btn').forEach(function(b){b.classList.remove('active');});
+  var pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
+  document.querySelectorAll('.sb-btn').forEach(function(b){if(b.getAttribute('data-page')===id)b.classList.add('active');});
+  if(id==='users')renderUsers();
+  if(id==='customers')renderCustomers();
+  if(id==='customerprofile'){}
+  if(id==='areas')renderAreas();
+  if(id==='tasks')renderTasks();
+  if(id==='events')renderEvents();
+  if(id==='dashboard')renderDashboard();
+}
+
+// MODAL
+function openModal(id){
+  if(id==='addUserModal'){resetUserForm();setTimeout(handleUserTypeChange,10);}
+  if(id==='addCustomerModal'&&editingCustomerIdx<0){resetCustomerForm();}
+  if(id==='addAreaModal'){populateAreaCustomers();}
+  if(id==='addTaskModal'){populateTaskDropdowns();selectedDays=[];}
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(function(bg){
+  bg.addEventListener('click',function(e){if(e.target===bg)bg.classList.remove('open');});
+});
+function filterTable(q,tbodyId){
+  document.querySelectorAll('#'+tbodyId+' tr').forEach(function(r){
+    r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+
+// USERS
+var userTab='Employee';
+var userActiveOnly=true;
+var editingUserIdx=-1;
+var currentProfileIdx=-1;
+
+var prevYear=new Date().getFullYear()-1;
+var currYear=new Date().getFullYear();
+
+function resetUserForm(){
+  editingUserIdx=-1;
+  document.getElementById('addUserTitle').textContent='New User';
+  ['uNick','uFname','uLname','uPhone','uEmail','uAddr','uIban','uYtun'].forEach(function(id){document.getElementById(id).value='';});
+  ['uBday','uSdate'].forEach(function(id){document.getElementById(id).value='';});
+  ['uTax','uRateM','uRateE'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('uType').value='Employee';
+  document.getElementById('uLangFi').checked=false;
+  document.getElementById('uLangEn').checked=false;
+  handleUserTypeChange();
+}
+
+function handleUserTypeChange(){
+  var t=document.getElementById('uType').value;
+  var ytun=document.getElementById('ytunWrap');
+  var tax=document.getElementById('taxWrap');
+  if(ytun) ytun.style.display=t==='Subcontractor'?'block':'none';
+  if(tax) tax.style.display=t==='Subcontractor'?'none':'block';
+}
+
+function saveUser(){
+  var nick=document.getElementById('uNick').value.trim();
+  var fname=document.getElementById('uFname').value.trim();
+  if(!nick||!fname){toast('Nickname and first name are required');return;}
+  var langs=[];
+  if(document.getElementById('uLangFi').checked)langs.push('fi');
+  if(document.getElementById('uLangEn').checked)langs.push('en');
+  var u={
+    id:editingUserIdx>=0?db.users[editingUserIdx].id:Date.now(),
+    nick:nick,fname:fname,lname:document.getElementById('uLname').value,
+    type:document.getElementById('uType').value,
+    phone:document.getElementById('uPhone').value,
+    email:document.getElementById('uEmail').value,
+    addr:document.getElementById('uAddr').value,
+    bday:document.getElementById('uBday').value,
+    sdate:document.getElementById('uSdate').value,
+    langs:langs,
+    tax:parseFloat(document.getElementById('uTax').value)||0,
+    rateM:parseFloat(document.getElementById('uRateM').value)||0,
+    rateE:parseFloat(document.getElementById('uRateE').value)||0,
+    iban:document.getElementById('uIban').value,
+    ytun:document.getElementById('uYtun').value,
+    active:true,
+    hours:editingUserIdx>=0?db.users[editingUserIdx].hours:{}
+  };
+  if(editingUserIdx>=0){db.users[editingUserIdx]=u;}
+  else{db.users.push(u);}
+  closeModal('addUserModal');save();toast(editingUserIdx>=0?'User updated!':'User added!');
+}
+
+function editCurrentUser(){
+  if(currentProfileIdx<0)return;
+  var u=db.users[currentProfileIdx];
+  editingUserIdx=currentProfileIdx;
+  document.getElementById('addUserTitle').textContent='Edit User';
+  document.getElementById('uNick').value=u.nick||'';
+  document.getElementById('uFname').value=u.fname||'';
+  document.getElementById('uLname').value=u.lname||'';
+  document.getElementById('uType').value=u.type||'Employee';
+  document.getElementById('uPhone').value=u.phone||'';
+  document.getElementById('uEmail').value=u.email||'';
+  document.getElementById('uAddr').value=u.addr||'';
+  document.getElementById('uBday').value=u.bday||'';
+  document.getElementById('uSdate').value=u.sdate||'';
+  document.getElementById('uLangFi').checked=(u.langs||[]).includes('fi');
+  document.getElementById('uLangEn').checked=(u.langs||[]).includes('en');
+  document.getElementById('uTax').value=u.tax||'';
+  document.getElementById('uRateM').value=u.rateM||'';
+  document.getElementById('uRateE').value=u.rateE||'';
+  document.getElementById('uIban').value=u.iban||'';
+  document.getElementById('uYtun').value=u.ytun||'';
+  handleUserTypeChange();
+  openModal('addUserModal');
+}
+
+function switchUserTab(type,btn){
+  userTab=type;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  renderUsers();
+}
+
+function toggleUserFilter(){
+  userActiveOnly=!userActiveOnly;
+  var btn=document.getElementById('userFilterBtn');
+  btn.classList.toggle('on',userActiveOnly);
+  document.getElementById('userFilterLbl').textContent=userActiveOnly?'Active only':'All users';
+  renderUsers();
+}
+
+function filterUsers(q){
+  document.querySelectorAll('#userTbody tr').forEach(function(r){
+    r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+
+function heatColor(h){
+  if(!h||h===0)return 'var(--border2)';
+  if(h<20)return '#C0DD97';
+  if(h<60)return '#639922';
+  if(h<100)return '#3B6D11';
+  return '#27500A';
+}
+
+function getUserHours(u,year){
+  var hours=u.hours||{};
+  return Array.from({length:12},function(_,m){
+    var key=year+'-'+String(m+1).padStart(2,'0');
+    return hours[key]||0;
+  });
+}
+
+function renderUsers(){
+  document.getElementById('th-prev-year').textContent=prevYear;
+  document.getElementById('th-curr-year').textContent=currYear;
+  var tbody=document.getElementById('userTbody');
+  var filtered=db.users.filter(function(u){
+    return u.type===userTab&&(userActiveOnly?u.active:true);
+  });
+  if(!filtered.length){
+    tbody.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-icon">👷</div><div class="empty-text">No '+(userActiveOnly?'active ':'')+userTab.toLowerCase()+'s yet</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML=filtered.map(function(u){
+    var ri=db.users.indexOf(u);
+    var flags=(u.langs||[]).map(function(l){return l==='fi'?'🇫🇮':'🇬🇧';}).join(' ');
+    var hPrev=getUserHours(u,prevYear);
+    var hCurr=getUserHours(u,currYear);
+    var prev=hPrev.map(function(h){return '<div class="heat-cell" style="background:'+heatColor(h)+'" title="'+h+'h"></div>';}).join('');
+    var curr=hCurr.map(function(h){return '<div class="heat-cell" style="background:'+heatColor(h)+'" title="'+h+'h"></div>';}).join('');
+    return '<tr class="'+(u.active?'':'inactive-row')+'">'+
+      '<td><div style="display:flex;align-items:center;gap:8px"><div class="av '+(u.type==='Subcontractor'?'av-blue':'av-green')+'">'+u.nick[0]+'</div><span style="font-weight:600">'+u.nick+'</span></div></td>'+
+      '<td style="color:var(--mid)">'+u.fname+' '+u.lname+'</td>'+
+      '<td>'+flags+'</td>'+
+      '<td><div class="heat-row">'+prev+'</div></td>'+
+      '<td><div class="heat-row">'+curr+'</div></td>'+
+      '<td style="font-size:12px">'+u.phone+'</td>'+
+      '<td style="font-size:12px;color:var(--mid)">'+u.email+'</td>'+
+      '<td><button class="icon-btn" onclick="openUserProfile('+ri+')">→</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+function openUserProfile(i){
+  currentProfileIdx=i;
+  var u=db.users[i];
+  showPage('userprofile');
+  document.getElementById('profAvatar').textContent=u.nick[0];
+  document.getElementById('profAvatar').className='av '+(u.type==='Subcontractor'?'av-blue':'av-green')+' av-lg';
+  document.getElementById('profFullName').textContent=u.fname+' '+u.lname;
+  document.getElementById('profSubtitle').textContent='Nickname: '+u.nick+' · '+u.type;
+  updateProfileStatus(u);
+  var flags=(u.langs||[]).map(function(l){return l==='fi'?'🇫🇮 Finnish':'🇬🇧 English';}).join(', ')||'—';
+  document.getElementById('profDetails').innerHTML=
+    '<div class="info-item"><label>Nickname</label><p>'+u.nick+'</p></div>'+
+    '<div class="info-item"><label>Languages</label><p>'+flags+'</p></div>'+
+    '<div class="info-item"><label>Phone</label><p>'+(u.phone||'—')+'</p></div>'+
+    '<div class="info-item"><label>Email</label><p>'+(u.email||'—')+'</p></div>'+
+    '<div class="info-item"><label>Address</label><p>'+(u.addr||'—')+'</p></div>'+
+    '<div class="info-item"><label>Birthday</label><p>'+formatDate(u.bday)+'</p></div>'+
+    '<div class="info-item"><label>Start Date</label><p>'+formatDate(u.sdate)+'</p></div>';
+  document.getElementById('profHoursTitle').textContent='Hours overview — '+currYear;
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var hCurr=getUserHours(u,currYear);
+  var maxH=Math.max.apply(null,hCurr.concat([1]));
+  document.getElementById('profMonthsChart').innerHTML=hCurr.map(function(h){
+    var pct=Math.round(h/maxH*100);
+    return '<div class="month-wrap">'+
+      '<div style="font-size:9px;color:var(--mist);text-align:center;margin-bottom:2px">'+(h||'')+'</div>'+
+      '<div class="month-bar"><div class="month-fill" style="height:'+pct+'%;background:'+(h>0?'var(--g600)':'transparent')+'"></div></div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('profMonthsLabels').innerHTML=months.map(function(m){
+    return '<div style="font-size:9px;color:var(--mist);text-align:center">'+m+'</div>';
+  }).join('');
+  var isSub=u.type==='Subcontractor';
+  document.getElementById('profSalary').innerHTML=
+    (!isSub?'<div class="info-item"><label>Tax Card</label><p>'+u.tax+'%</p></div>':'')+
+    '<div class="info-item"><label>IBAN</label><p>'+(u.iban||'—')+'</p></div>'+
+    '<div class="info-item"><label>Morning Rate</label><p>€'+(u.rateM||0)+'/h</p></div>'+
+    '<div class="info-item"><label>Evening Rate</label><p>€'+(u.rateE||0)+'/h</p></div>'+
+    (isSub&&u.ytun?'<div class="info-item"><label>Y-tunnus</label><p>'+u.ytun+'</p></div>':'');
+}
+
+function updateProfileStatus(u){
+  var badge=document.getElementById('profStatusBadge');
+  var btn=document.getElementById('profToggleBtn');
+  if(u.active){
+    badge.className='badge badge-green';badge.textContent='Active';
+    btn.className='btn btn-danger btn-sm';btn.textContent='Set Inactive';
+  } else {
+    badge.className='badge badge-red';badge.textContent='Inactive';
+    btn.className='btn btn-success btn-sm';btn.textContent='Set Active';
+  }
+}
+
+function toggleProfileActive(){
+  if(currentProfileIdx<0)return;
+  db.users[currentProfileIdx].active=!db.users[currentProfileIdx].active;
+  updateProfileStatus(db.users[currentProfileIdx]);
+  save();toast('Status updated!');
+}
+
+// CUSTOMERS
+var currentCType='home';
+var editingCustomerIdx=-1;
+var currentCustomerProfileIdx=-1;
+var pendingContacts=[];
+function resetCustomerForm(){
+  editingCustomerIdx=-1;
+  currentCType='home';
+  pendingContacts=[];
+  setCType('home');
+  document.getElementById('custModalTitle').textContent='New Customer';
+  ['cName','cPhone','cEmail','cCity','cAddr','cNotes','cCompany','cCompanyYtun','cAddrOffice'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  var can=document.getElementById('cCancel');if(can)can.value='';
+  var cil=document.getElementById('contactInputsList');
+  if(cil){cil.innerHTML='';addContactInput();}
+}
+function setCType(t){
+  currentCType=t;
+  document.getElementById('ctHome').className=t==='home'?'btn btn-primary btn-sm':'btn btn-outline btn-sm';
+  document.getElementById('ctOffice').className=t==='office'?'btn btn-primary btn-sm':'btn btn-outline btn-sm';
+  document.getElementById('cHomeFields').style.display=t==='home'?'block':'none';
+  document.getElementById('cOfficeFields').style.display=t==='office'?'block':'none';
+}
+function addContactInput(){
+  var div=document.createElement('div');
+  div.className='form-grid c3';
+  div.style.marginBottom='8px';
+  div.innerHTML='<div class="form-group"><label>Name</label><input class="ci-name" placeholder="Contact name"></div><div class="form-group"><label>Phone</label><input class="ci-phone" placeholder="+358..."></div><div class="form-group"><label>Email</label><input class="ci-email" placeholder="email@..."></div>';
+  var list=document.getElementById('contactInputsList');
+  if(list)list.appendChild(div);
+}
+
+function getContactInputs(){
+  var contacts=[];
+  var rows=document.getElementById('contactInputsList');
+  if(!rows)return contacts;
+  rows.querySelectorAll('.form-grid').forEach(function(row){
+    var name=row.querySelector('.ci-name').value.trim();
+    var phone=row.querySelector('.ci-phone').value.trim();
+    var email=row.querySelector('.ci-email').value.trim();
+    if(name)contacts.push({name:name,phone:phone,email:email});
+  });
+  return contacts;
+}
+
+
+function deleteCustomer(i){if(confirm('Delete this customer?')){db.customers.splice(i,1);save();toast('Deleted');}}
+function renderCustomers(){
+  var tbody=document.getElementById('customerTbody');
+  if(!db.customers.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🏢</div><div class="empty-text">No customers yet</div></div></td></tr>';return;}
+  tbody.innerHTML=db.customers.map(function(c,i){
+    return '<tr>'+
+      '<td><div style="display:flex;align-items:center;gap:8px"><div class="av '+(c.type==='office'?'av-blue':'av-green')+'">'+c.name[0]+'</div><div><div style="font-weight:600">'+c.name+'</div><div style="font-size:11px;color:var(--mist)">'+(c.addr||'')+'</div></div></div></td>'+
+      '<td><span class="badge '+(c.type==='office'?'badge-blue':'badge-green')+'">'+c.type+'</span></td>'+
+      '<td>'+(c.city||'—')+'</td>'+
+      '<td>'+(c.contact||'—')+'</td>'+
+      '<td style="font-size:12px">'+(c.contactPhone||c.phone||'—')+'</td>'+
+      '<td><span class="badge '+(c.active===false?'badge-red':'badge-green')+'">'+(c.active===false?'Inactive':'Active')+'</span></td>'+
+      '<td><button class="btn btn-danger btn-sm" onclick="deleteCustomer('+i+')">Delete</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// AREAS
+function populateAreaCustomers(){
+  var sel=document.getElementById('aCustomer');
+  sel.innerHTML='<option value="">Select customer...</option>';
+  db.customers.forEach(function(c,i){var o=document.createElement('option');o.value=i;o.textContent=c.name;sel.appendChild(o);});
+  ['aName','aFloor','aEntrance','aKeys','aCodes','aParking','aWorkTime','aCleanRoom','aSafety','aExtra'].forEach(function(id){document.getElementById(id).value='';});
+  ['aMachines','aSanitary','aKitchen','aWaste'].forEach(function(id){document.getElementById(id).value='';});
+}
+function saveArea(){
+  var name=document.getElementById('aName').value.trim();
+  var ci=document.getElementById('aCustomer').value;
+  if(!name){toast('Area name is required');return;}
+  db.areas.push({
+    id:Date.now(),name:name,customerId:ci>=0?db.customers[ci].id:null,customerName:ci!==''?db.customers[ci].name:'',
+    floor:document.getElementById('aFloor').value,entrance:document.getElementById('aEntrance').value,
+    keys:document.getElementById('aKeys').value,codes:document.getElementById('aCodes').value,
+    parking:document.getElementById('aParking').value,workTime:document.getElementById('aWorkTime').value,
+    cleanRoom:document.getElementById('aCleanRoom').value,machines:document.getElementById('aMachines').value,
+    sanitary:document.getElementById('aSanitary').value,kitchen:document.getElementById('aKitchen').value,
+    waste:document.getElementById('aWaste').value,safety:document.getElementById('aSafety').value,
+    extra:document.getElementById('aExtra').value,active:true
+  });
+  closeModal('addAreaModal');save();toast('Area added!');
+}
+function deleteArea(i){if(confirm('Delete this area?')){db.areas.splice(i,1);save();toast('Deleted');}}
+function renderAreas(){
+  var tbody=document.getElementById('areaTbody');
+  if(!db.areas.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">📍</div><div class="empty-text">No areas yet</div></div></td></tr>';return;}
+  tbody.innerHTML=db.areas.map(function(a,i){
+    return '<tr>'+
+      '<td><div style="font-weight:600">'+a.name+'</div></td>'+
+      '<td style="color:var(--mid)">'+(a.customerName||'—')+'</td>'+
+      '<td style="font-size:12px">'+(a.floor||'—')+'</td>'+
+      '<td style="font-size:12px">'+(a.entrance||'—')+'</td>'+
+      '<td style="font-size:12px">'+(a.workTime||'—')+'</td>'+
+      '<td><span class="badge '+(c.active===false?'badge-red':'badge-green')+'">'+(c.active===false?'Inactive':'Active')+'</span></td>'+
+      '<td><button class="btn btn-danger btn-sm" onclick="deleteArea('+i+')">Delete</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// TASKS
+var selectedDays=[];
+function populateTaskDropdowns(){
+  var cSel=document.getElementById('tCustomer');
+  cSel.innerHTML='<option value="">Select customer...</option>';
+  db.customers.forEach(function(c,i){var o=document.createElement('option');o.value=i;o.textContent=c.name;cSel.appendChild(o);});
+  var uSel=document.getElementById('tUser');
+  uSel.innerHTML='<option value="">Unassigned</option>';
+  db.users.filter(function(u){return u.active;}).forEach(function(u,i){var ri=db.users.indexOf(u);var o=document.createElement('option');o.value=ri;o.textContent=u.nick;uSel.appendChild(o);});
+  document.getElementById('tArea').innerHTML='<option value="">Select area...</option>';
+  document.getElementById('tNameDisplay').textContent='Select customer & area first';
+  document.getElementById('tNameDisplay').style.color='var(--mist)';
+  ['tHours','tEarnings'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('tRateBox').style.display='none';
+  document.querySelectorAll('#daySelector button').forEach(function(b){b.className='btn btn-outline btn-sm';});
+  var td=new Date();td.setDate(td.getDate()+14);
+  document.getElementById('tStart').value=dateStr(td);
+}
+function filterTaskAreas(){
+  var ci=document.getElementById('tCustomer').value;
+  var aSel=document.getElementById('tArea');
+  aSel.innerHTML='<option value="">Select area...</option>';
+  if(ci===''){updateTaskName();return;}
+  var custId=db.customers[ci].id;
+  db.areas.filter(function(a){return a.customerId===custId;}).forEach(function(a,i){
+    var ri=db.areas.indexOf(a);var o=document.createElement('option');o.value=ri;o.textContent=a.name;aSel.appendChild(o);
+  });
+  updateTaskName();
+}
+function updateTaskName(){
+  var ci=document.getElementById('tCustomer').value;
+  var ai=document.getElementById('tArea').value;
+  var display=document.getElementById('tNameDisplay');
+  if(ci!==''&&ai!==''){
+    display.textContent=db.areas[ai].name;
+    display.style.color='var(--slate)';
+  } else if(ci!==''){
+    display.textContent=db.customers[ci].name;
+    display.style.color='var(--mid)';
+  } else {
+    display.textContent='Select customer & area first';
+    display.style.color='var(--mist)';
+  }
+}
+function toggleDay(btn,day){
+  if(selectedDays.includes(day)){selectedDays=selectedDays.filter(function(d){return d!==day;});btn.className='btn btn-outline btn-sm';}
+  else{selectedDays.push(day);btn.className='btn btn-primary btn-sm';}
+}
+function calcTaskRate(){
+  var h=parseFloat(document.getElementById('tHours').value)||0;
+  var e=parseFloat(document.getElementById('tEarnings').value)||0;
+  var box=document.getElementById('tRateBox');
+  if(h>0&&e>0){box.style.display='block';box.textContent='Effective rate: €'+(e/h).toFixed(2)+'/hour';}
+  else box.style.display='none';
+}
+function saveTask(){
+  var ci=document.getElementById('tCustomer').value;
+  var ai=document.getElementById('tArea').value;
+  var hours=parseFloat(document.getElementById('tHours').value)||0;
+  var earn=parseFloat(document.getElementById('tEarnings').value)||0;
+  var start=document.getElementById('tStart').value;
+  if(ci===''||!hours||!earn||!start||!selectedDays.length){toast('Please fill all required fields');return;}
+  var customer=db.customers[ci];
+  var area=ai!==''?db.areas[ai]:null;
+  var ui=document.getElementById('tUser').value;
+  var user=ui!==''?db.users[ui]:null;
+  var task={id:Date.now(),name:area?area.name:customer.name,customerName:customer.name,customerId:customer.id,areaName:area?area.name:'',areaId:area?area.id:null,hours:hours,earnings:earn,days:selectedDays.slice(),cycle:document.getElementById('tCycle').value,userNick:user?user.nick:'',userId:user?user.id:null,start:start,months:parseInt(document.getElementById('tMonths').value),active:true};
+  db.tasks.push(task);
+  var count=generateShifts(task);
+  selectedDays=[];
+  closeModal('addTaskModal');save();toast(count+' shifts generated!');
+}
+function generateShifts(task){
+  var dayMap={Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6,Sun:0};
+  var min=new Date();min.setDate(min.getDate()+14);
+  var end=new Date();end.setMonth(end.getMonth()+task.months);
+  var cur=new Date(task.start);if(cur<min)cur=new Date(min);
+  var count=0;var weekSkip=0;
+  while(cur<=end){
+    var dow=cur.getDay();
+    var dn=Object.keys(dayMap).find(function(k){return dayMap[k]===dow;});
+    if(task.days.includes(dn)){
+      var ok=task.cycle==='Weekly'||(task.cycle==='Bi-weekly'&&weekSkip%2===0)||(task.cycle==='Monthly'&&count===0);
+      if(ok){db.shifts.push({id:Date.now()+Math.random(),date:dateStr(cur),taskId:task.id,taskName:task.name,customerName:task.customerName,areaName:task.areaName,userNick:task.userNick,userId:task.userId,hours:task.hours,earnings:task.earnings,status:'Scheduled'});count++;}
+    }
+    cur.setDate(cur.getDate()+1);if(cur.getDay()===1)weekSkip++;
+  }
+  return count;
+}
+function toggleTask(i){db.tasks[i].active=!db.tasks[i].active;save();toast('Task '+(db.tasks[i].active?'activated':'deactivated')+'!');}
+function deleteTask(i){if(confirm('Delete task?')){var t=db.tasks[i];db.shifts=db.shifts.filter(function(s){return s.taskId!==t.id;});db.tasks.splice(i,1);save();toast('Task deleted');}}
+function renderTasks(){
+  var tbody=document.getElementById('taskTbody');
+  if(!db.tasks.length){tbody.innerHTML='<tr><td colspan="9"><div class="empty"><div class="empty-icon">🗂️</div><div class="empty-text">No tasks yet</div></div></td></tr>';return;}
+  tbody.innerHTML=db.tasks.map(function(t,i){
+    return '<tr>'+
+      '<td><div style="font-weight:600">'+t.name+'</div></td>'+
+      '<td style="color:var(--mid)">'+t.customerName+'</td>'+
+      '<td style="color:var(--mid)">'+(t.areaName||'—')+'</td>'+
+      '<td><strong>€'+t.earnings+'</strong><span style="font-size:11px;color:var(--mist);margin-left:4px">'+t.hours+'h</span></td>'+
+      '<td style="font-size:12px">'+t.days.join(', ')+'</td>'+
+      '<td><span class="badge badge-gray">'+t.cycle+'</span></td>'+
+      '<td>'+(t.userNick||'<span style="color:var(--mist)">Unassigned</span>')+'</td>'+
+      '<td><button class="btn btn-sm '+(t.active?'btn-danger':'btn-success')+'" onclick="toggleTask('+i+')">'+(t.active?'Set Inactive':'Set Active')+'</button></td>'+
+      '<td><button class="btn btn-danger btn-sm" onclick="deleteTask('+i+')">Delete</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// EVENTS
+var eventTab='holiday';
+function switchEventTab(tab,btn){
+  eventTab=tab;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  var addBtn=document.getElementById('addEventBtn');
+  addBtn.textContent=tab==='publicholiday'?'+ Add Public Holiday':tab==='sickleave'?'+ Add Sick Leave':'+ Add Holiday';
+  renderEvents();
+}
+function addEventItem(){toast('Event forms coming in next session!');}
+function renderEvents(){
+  var evts=db.events.filter(function(e){return e.tab===eventTab;});
+  var content=document.getElementById('eventContent');
+  if(!evts.length){content.innerHTML='<div class="card"><div class="card-body"><div class="empty"><div class="empty-icon">'+(eventTab==='holiday'?'🏖️':eventTab==='sickleave'?'🤒':'📅')+'</div><div class="empty-text">No '+eventTab.replace('publicholiday','public holidays').replace('sickleave','sick leave')+'s yet</div></div></div></div>';return;}
+  content.innerHTML='<div class="card"><div class="card-body"><p style="color:var(--mist);font-size:13px">'+evts.length+' event(s)</p></div></div>';
+}
+
+// SETTINGS
+function saveSettings(){
+  db.settings={company:document.getElementById('setCompany').value,ytunnus:document.getElementById('setYtunnus').value,phone:document.getElementById('setPhone').value,email:document.getElementById('setEmail').value,iban:document.getElementById('setIban').value};
+  save();toast('Settings saved!');
+}
+function changePassword(){
+  var n=document.getElementById('setPwNew').value;
+  var c=document.getElementById('setPwConfirm').value;
+  if(!n||n.length<4){toast('Password must be at least 4 characters');return;}
+  if(n!==c){toast('Passwords do not match');return;}
+  localStorage.setItem('ss_pw',n);
+  document.getElementById('setPwNew').value='';document.getElementById('setPwConfirm').value='';
+  toast('Password changed!');
+}
+function exportData(){
+  var blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');
+  a.href=url;a.download='SarkerSiivous-Backup-'+dateStr(new Date())+'.json';a.click();
+  URL.revokeObjectURL(url);toast('Backup downloaded!');
+}
+
+// DASHBOARD
+function renderDashboard(){
+  var now=new Date();
+  document.getElementById('dCustomers').textContent=db.customers.length;
+  document.getElementById('dUsers').textContent=db.users.filter(function(u){return u.active;}).length;
+  var m=now.getMonth();var y=now.getFullYear();
+  var monthShifts=db.shifts.filter(function(s){var d=new Date(s.date);return d.getMonth()===m&&d.getFullYear()===y;});
+  document.getElementById('dShifts').textContent=monthShifts.length;
+  var rev=monthShifts.filter(function(s){return s.status==='Completed';}).reduce(function(sum,s){return sum+(s.earnings||0);},0);
+  document.getElementById('dRevenue').textContent='€'+rev.toLocaleString();
+  document.getElementById('tbRevenue').textContent='€'+rev.toLocaleString();
+  document.getElementById('dashUsers').innerHTML=db.users.filter(function(u){return u.active;}).slice(0,5).map(function(u){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2)"><div class="av '+(u.type==='Subcontractor'?'av-blue':'av-green')+'">'+u.nick[0]+'</div><div style="flex:1"><div style="font-weight:600;font-size:13px">'+u.nick+'</div><div style="font-size:11px;color:var(--mist)">'+u.fname+' '+u.lname+'</div></div><span class="badge badge-green">Active</span></div>';
+  }).join('')||'<div class="empty"><div class="empty-icon">👷</div><div class="empty-text">No users yet</div></div>';
+  document.getElementById('dashCustomers').innerHTML=db.customers.slice(-5).reverse().map(function(c){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2)"><div class="av '+(c.type==='office'?'av-blue':'av-green')+'">'+c.name[0]+'</div><div style="flex:1"><div style="font-weight:600;font-size:13px">'+c.name+'</div><div style="font-size:11px;color:var(--mist)">'+(c.city||'')+'</div></div><span class="badge '+(c.type==='office'?'badge-blue':'badge-green')+'">'+c.type+'</span></div>';
+  }).join('')||'<div class="empty"><div class="empty-icon">🏢</div><div class="empty-text">No customers yet</div></div>';
+}
+
+function refreshAll(){
+  var active=document.querySelector('.page.active');
+  if(!active)return;
+  var id=active.id.replace('page-','');
+  if(id==='dashboard')renderDashboard();
+  else if(id==='users')renderUsers();
+  else if(id==='customers')renderCustomers();
+  if(id==='customerprofile'){}
+  else if(id==='areas')renderAreas();
+  else if(id==='tasks')renderTasks();
+  else if(id==='events')renderEvents();
+}
+
+// INIT
+function init(){
+  load();checkSession();
+  var now=new Date();
+  document.getElementById('tbDate').textContent=now.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  document.getElementById('dashSub').textContent="Here's your overview for "+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if(db.settings&&db.settings.company)document.getElementById('setCompany').value=db.settings.company;
+  renderDashboard();
+}
+init();
+
+function updateCustomerStatus(c){
+  var badge=document.getElementById('cprofStatusBadge');
+  var btn=document.getElementById('cprofToggleBtn');
+  if(c.active!==false){
+    badge.className='badge badge-green';badge.textContent='Active';
+    btn.className='btn btn-danger btn-sm';btn.textContent='Set Inactive';
+  } else {
+    badge.className='badge badge-red';badge.textContent='Inactive';
+    btn.className='btn btn-success btn-sm';btn.textContent='Set Active';
+  }
+}
+function toggleCustomerActive(){
+  if(currentCustomerProfileIdx<0)return;
+  var c=db.customers[currentCustomerProfileIdx];
+  c.active=(c.active===false)?true:false;
+  updateCustomerStatus(c);
+  save();toast('Status updated!');
+}
+
+function openCustomerProfile(i){
+  currentCustomerProfileIdx=i;
+  var c=db.customers[i];
+  showPage('customerprofile');
+  document.getElementById('cprofAvatar').textContent=c.name[0];
+  document.getElementById('cprofAvatar').className='av '+(c.type==='office'?'av-blue':'av-green')+' av-lg';
+  document.getElementById('cprofName').textContent=c.name;
+  document.getElementById('cprofSub').textContent=c.type==='office'?'Office client':'Home client';
+  updateCustomerStatus(c);
+  renderCustomerProfile(c);
+}
+function saveContact(){
+  var name=document.getElementById('acName').value.trim();
+  if(!name){toast('Name is required');return;}
+  if(!db.customers[currentCustomerProfileIdx].contacts)db.customers[currentCustomerProfileIdx].contacts=[];
+  db.customers[currentCustomerProfileIdx].contacts.push({name:name,phone:document.getElementById('acPhone').value,email:document.getElementById('acEmail').value});
+  closeModal('addContactModal');save();
+  renderCustomerProfile(db.customers[currentCustomerProfileIdx]);
+  toast('Contact added!');
+}
+
+function saveCustomer(){
+  var c={id:editingCustomerIdx>=0?db.customers[editingCustomerIdx].id:Date.now(),type:currentCType,notes:document.getElementById('cNotes').value,active:true,added:dateStr(new Date()),contacts:[]};
+  if(currentCType==='home'){
+    var name=document.getElementById('cName').value.trim();
+    if(!name){toast('Name is required');return;}
+    c.name=name;c.phone=document.getElementById('cPhone').value;
+    c.email=document.getElementById('cEmail').value;
+    c.city=document.getElementById('cCity').value;
+    c.addr=document.getElementById('cAddr').value;
+  } else {
+    var company=document.getElementById('cCompany').value.trim();
+    if(!company){toast('Company name is required');return;}
+    c.name=company;c.ytun=document.getElementById('cCompanyYtun').value;
+    c.addr=document.getElementById('cAddrOffice').value;
+    c.cancel=document.getElementById('cCancel').value;
+    c.contacts=getContactInputs();
+  }
+  var wasEditing=editingCustomerIdx>=0;
+  if(wasEditing){db.customers[editingCustomerIdx]=c;}
+  else{db.customers.push(c);}
+  closeModal('addCustomerModal');editingCustomerIdx=-1;
+  save();toast(wasEditing?'Customer updated!':'Customer added!');
+}
+function openCustomerProfile(i){
+  currentCustomerProfileIdx=i;
+  var c=db.customers[i];
+  showPage('customerprofile');
+  document.getElementById('cprofAvatar').textContent=c.name[0];
+  document.getElementById('cprofAvatar').className='av '+(c.type==='office'?'av-blue':'av-green')+' av-lg';
+  document.getElementById('cprofName').textContent=c.name;
+  document.getElementById('cprofSub').textContent=c.type==='office'?'Office client':'Home client';
+  updateCustomerStatus(c);
+  renderCustomerProfile(c);
+}
+function saveContact(){
+  var name=document.getElementById('acName').value.trim();
+  if(!name){toast('Name is required');return;}
+  if(!db.customers[currentCustomerProfileIdx].contacts)db.customers[currentCustomerProfileIdx].contacts=[];
+  db.customers[currentCustomerProfileIdx].contacts.push({
+    name:name,
+    phone:document.getElementById('acPhone').value,
+    email:document.getElementById('acEmail').value
+  });
+  closeModal('addContactModal');save();
+  renderCustomerProfile(db.customers[currentCustomerProfileIdx]);
+  toast('Contact added!');
+}
+function editCurrentCustomer(){
+  if(currentCustomerProfileIdx<0)return;
+  var c=db.customers[currentCustomerProfileIdx];
+  editingCustomerIdx=currentCustomerProfileIdx;
+  document.getElementById('custModalTitle').textContent='Edit Customer';
+  setCType(c.type);
+  if(c.type==='home'){
+    document.getElementById('cName').value=c.name||'';
+    document.getElementById('cPhone').value=c.phone||'';
+    document.getElementById('cEmail').value=c.email||'';
+    document.getElementById('cCity').value=c.city||'';
+    document.getElementById('cAddr').value=c.addr||'';
+  } else {
+    document.getElementById('cCompany').value=c.name||'';
+    document.getElementById('cCompanyYtun').value=c.ytun||'';
+    document.getElementById('cAddrOffice').value=c.addr||'';
+    document.getElementById('cCancel').value=c.cancel||'';
+    var cil=document.getElementById('contactInputsList');
+    cil.innerHTML='';
+    (c.contacts||[]).forEach(function(ct){
+      addContactInput();
+      var rows=cil.querySelectorAll('.form-grid');
+      var last=rows[rows.length-1];
+      last.querySelector('.ci-name').value=ct.name||'';
+      last.querySelector('.ci-phone').value=ct.phone||'';
+      last.querySelector('.ci-email').value=ct.email||'';
+    });
+    if(!(c.contacts&&c.contacts.length))addContactInput();
+  }
+  document.getElementById('cNotes').value=c.notes||'';
+  openModal('addCustomerModal');
+}
+
+function renderCustomerProfile(c){
+  if(c.type==='office'){
+    document.getElementById('cprofDetails').innerHTML=
+      '<div class="info-item"><label>Company</label><p>'+c.name+'</p></div>'+
+      '<div class="info-item"><label>Y-tunnus</label><p>'+(c.ytun||'—')+'</p></div>'+
+      '<div class="info-item"><label>City</label><p>'+(c.city||'—')+'</p></div>'+
+      '<div class="info-item"><label>Address</label><p>'+(c.addr||'—')+'</p></div>'+
+      '<div class="info-item"><label>Contract</label><p>'+(c.contract||'—')+'</p></div>'+
+      '<div class="info-item"><label>Cancellation</label><p>'+(c.cancel||'—')+'</p></div>';
+  } else {
+    document.getElementById('cprofDetails').innerHTML=
+      '<div class="info-item"><label>Name</label><p>'+c.name+'</p></div>'+
+      '<div class="info-item"><label>Phone</label><p>'+(c.phone||'—')+'</p></div>'+
+      '<div class="info-item"><label>Email</label><p>'+(c.email||'—')+'</p></div>'+
+      '<div class="info-item"><label>City</label><p>'+(c.city||'—')+'</p></div>'+
+      '<div class="info-item"><label>Address</label><p>'+(c.addr||'—')+'</p></div>';
+  }
+  var contacts=c.contacts||[];
+  var cl=document.getElementById('cprofContacts');
+  if(!contacts.length){cl.innerHTML='<div style="font-size:12px;color:var(--mist);padding:6px 0">No contacts added yet</div>';return;}
+  cl.innerHTML=contacts.map(function(ct,ci){
+    var i=db.customers.indexOf(c);
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border2)">'+
+      '<div class="av av-green" style="width:28px;height:28px;font-size:11px">'+ct.name[0]+'</div>'+
+      '<div style="flex:1"><div style="font-weight:600;font-size:13px">'+ct.name+'</div>'+
+      '<div style="font-size:11px;color:var(--mist)">'+(ct.phone||'')+(ct.email?' · '+ct.email:'')+'</div></div>'+
+      '<button class="icon-btn" onclick="deleteContact('+i+','+ci+')" style="color:var(--red)">🗑</button>'+
+    '</div>';
+  }).join('');
+}
+function deleteContact(ci,cti){
+  if(confirm('Delete this contact?')){
+    db.customers[ci].contacts.splice(cti,1);
+    save();
+    renderCustomerProfile(db.customers[ci]);
+    toast('Contact deleted');
+  }
+}
+</script>
+</body>
+</html>
