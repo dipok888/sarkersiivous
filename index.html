@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SarkerSiivous Business OS</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>SarkerSiivous Business OS v1775372075</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <script>
 function checkPw(){
@@ -33,7 +36,7 @@ function checkSession(){
   --red:#ef4444;--red50:#fef2f2;--red100:#fee2e2;--red800:#991b1b;
   --blue:#3b82f6;--blue50:#eff6ff;--blue100:#dbeafe;--blue800:#1e40af;
   --gold:#f59e0b;--gold50:#fffbeb;--gold100:#fef3c7;--gold800:#92400e;
-  --sb:220px;--tb:58px;
+  --sb:220px;--tb:58px;--agentbar:44px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);font-size:14px;min-height:100vh}
@@ -59,7 +62,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
 .tb-av{width:30px;height:30px;border-radius:50%;background:var(--g500);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#fff}
 
 /* SIDEBAR */
-.sidebar{position:fixed;top:var(--tb);left:0;bottom:0;width:var(--sb);background:var(--w);border-right:1px solid var(--border);overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sidebar{position:fixed;top:calc(var(--tb) + var(--agentbar));left:0;bottom:0;width:var(--sb);background:var(--w);border-right:1px solid var(--border);overflow-y:auto;z-index:100;display:flex;flex-direction:column}
 .sb-section{padding:12px 10px 4px}
 .sb-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--mist);padding:0 8px;margin-bottom:3px}
 .sb-btn{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--mid);transition:all .15s;text-align:left;margin-bottom:1px}
@@ -70,7 +73,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
 .sb-div{height:1px;background:var(--border2);margin:6px 10px}
 
 /* MAIN */
-.main{margin-left:var(--sb);margin-top:var(--tb);min-height:calc(100vh - var(--tb));padding:24px}
+.main{margin-left:var(--sb);margin-top:calc(var(--tb) + var(--agentbar));min-height:calc(100vh - var(--tb) - var(--agentbar));padding:24px}
 
 /* PAGES */
 .page{display:none}
@@ -175,6 +178,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
 .month-lbl{font-size:9px;color:var(--mist);text-align:center}
 .month-val{font-size:9px;color:var(--mist);text-align:center;min-height:11px}
 
+/* AGENT BAR */
+.agent-bar{position:fixed;top:var(--tb);left:0;right:0;height:var(--agentbar);background:var(--g900);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;padding:0 20px;gap:8px;z-index:150}
+.agent-bar-lbl{font-size:11px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-right:4px}
+.agent-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.agent-pill:hover,.agent-pill.active{background:var(--g600);border-color:var(--g400);color:#fff}
+.a-dot{width:6px;height:6px;border-radius:50%;background:var(--g300)}
+.agent-wrap{position:fixed;bottom:0;left:var(--sb);right:0;height:370px;background:var(--w);border-top:2px solid var(--g500);z-index:140;display:none;flex-direction:column}
+.agent-wrap.open{display:flex}
+.agent-head{padding:10px 16px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;background:var(--g50)}
+.agent-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--g800);flex:1}
+.agent-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--mist);padding:4px 8px}
+.agent-msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.agent-msg{display:flex;gap:8px}
+.agent-msg.user{flex-direction:row-reverse}
+.agent-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:linear-gradient(135deg,var(--g700),var(--g500))}
+.agent-msg.user .agent-av{background:linear-gradient(135deg,#3b82f6,#0ea5e9);font-size:10px;font-weight:700;color:#fff;font-family:'Syne',sans-serif}
+.agent-bubble{max-width:78%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5}
+.agent-msg.ai .agent-bubble{background:var(--snow);border:1px solid var(--border)}
+.agent-msg.user .agent-bubble{background:linear-gradient(135deg,var(--g700),var(--g600));color:#fff}
+.agent-input-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px}
+.agent-input{flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.agent-input:focus{border-color:var(--g500)}
+.agent-send{width:38px;height:38px;border-radius:9px;background:var(--g700);border:none;cursor:pointer;color:#fff;font-size:16px}
+.typing{display:flex;gap:4px;align-items:center}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--mist);animation:tdot 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
 /* TOAST */
 .toast{position:fixed;bottom:20px;right:20px;background:var(--g800);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;z-index:999;transform:translateY(60px);opacity:0;transition:all .25s}
 .toast.show{transform:translateY(0);opacity:1}
@@ -214,6 +245,30 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
     <div class="tb-av">D</div>
   </div>
 </header>
+
+<!-- AGENT BAR -->
+<div class="agent-bar">
+  <div class="agent-bar-lbl">🤖 AI Agents</div>
+  <button class="agent-pill" id="pill-assistant" onclick="openAgent('assistant')"><div class="a-dot"></div>Assistant</button>
+  <button class="agent-pill" id="pill-sales" onclick="openAgent('sales')"><div class="a-dot"></div>Sales</button>
+  <button class="agent-pill" id="pill-marketing" onclick="openAgent('marketing')"><div class="a-dot"></div>Marketing</button>
+  <button class="agent-pill" id="pill-accounting" onclick="openAgent('accounting')"><div class="a-dot"></div>Accounting</button>
+  <button class="agent-pill" id="pill-operations" onclick="openAgent('operations')"><div class="a-dot"></div>Operations</button>
+</div>
+
+<!-- AGENT CHAT -->
+<div class="agent-wrap" id="agentWrap">
+  <div class="agent-head">
+    <div class="a-dot" style="width:10px;height:10px;background:var(--g400)"></div>
+    <div class="agent-title" id="agentTitle">Assistant</div>
+    <button class="agent-close" onclick="closeAgent()">✕</button>
+  </div>
+  <div class="agent-msgs" id="agentMsgs"></div>
+  <div class="agent-input-row">
+    <input class="agent-input" id="agentInput" placeholder="Ask your agent..." onkeydown="if(event.key==='Enter')sendAgentMsg()">
+    <button class="agent-send" onclick="sendAgentMsg()">➤</button>
+  </div>
+</div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -346,7 +401,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
       <input type="text" placeholder="Search..." style="width:180px;padding:5px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;outline:none" oninput="filterTable(this.value,'customerTbody')">
     </div>
     <div class="tbl-wrap">
-      <table class="tbl"><thead><tr><th>Name</th><th>Type</th><th>City</th><th>Contact Person</th><th>Phone</th><th>Status</th><th></th></tr></thead>
+      <table class="tbl"><thead><tr><th>Name</th><th>Type</th><th>Contact Person</th><th>Phone</th><th>Status</th><th></th></tr></thead>
       <tbody id="customerTbody"></tbody></table>
     </div>
   </div>
@@ -1010,16 +1065,21 @@ function getContactInputs(){
 function deleteCustomer(i){if(confirm('Delete this customer?')){db.customers.splice(i,1);save();toast('Deleted');}}
 function renderCustomers(){
   var tbody=document.getElementById('customerTbody');
-  if(!db.customers.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🏢</div><div class="empty-text">No customers yet</div></div></td></tr>';return;}
+  if(!db.customers.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🏢</div><div class="empty-text">No customers yet</div></div></td></tr>';return;}
   tbody.innerHTML=db.customers.map(function(c,i){
+    var contact=c.contacts&&c.contacts.length?c.contacts[0].name:(c.type==='home'?'—':'—');
+    var phone=c.contacts&&c.contacts.length?c.contacts[0].phone:(c.phone||'—');
     return '<tr>'+
       '<td><div style="display:flex;align-items:center;gap:8px"><div class="av '+(c.type==='office'?'av-blue':'av-green')+'">'+c.name[0]+'</div><div><div style="font-weight:600">'+c.name+'</div><div style="font-size:11px;color:var(--mist)">'+(c.addr||'')+'</div></div></div></td>'+
       '<td><span class="badge '+(c.type==='office'?'badge-blue':'badge-green')+'">'+c.type+'</span></td>'+
-      '<td>'+(c.city||'—')+'</td>'+
-      '<td>'+(c.contact||'—')+'</td>'+
-      '<td style="font-size:12px">'+(c.contactPhone||c.phone||'—')+'</td>'+
+      '<td style="font-size:12px">'+contact+'</td>'+
+      '<td style="font-size:12px">'+phone+'</td>'+
       '<td><span class="badge '+(c.active===false?'badge-red':'badge-green')+'">'+(c.active===false?'Inactive':'Active')+'</span></td>'+
-      '<td><button class="btn btn-danger btn-sm" onclick="deleteCustomer('+i+')">Delete</button></td>'+
+      '<td><div style="display:flex;gap:4px">'+
+        '<button class="icon-btn" onclick="openCustomerProfile('+i+')" title="View">→</button>'+
+        '<button class="btn btn-outline btn-sm" onclick="quickEditCustomer('+i+')">✏️ Edit</button>'+
+        '<button class="btn btn-danger btn-sm" onclick="deleteCustomer('+i+')">Delete</button>'+
+      '</div></td>'+
     '</tr>';
   }).join('');
 }
@@ -1422,6 +1482,70 @@ function quickEditCustomer(i){
 function quickEditUser(i){
   currentProfileIdx=i;
   editCurrentUser();
+}
+
+// ══ AI AGENTS ══
+var currentAgent='assistant';
+var agentHistories={assistant:[],sales:[],marketing:[],accounting:[],operations:[]};
+var agentCfg={
+  assistant:{name:'Personal Assistant',emoji:'🤖',sys:'You are the Personal Assistant for SarkerSiivous Oy, a Finnish cleaning company owned by Dipok, targeting €1M revenue. Be practical, actionable, encouraging. Respond in English.'},
+  sales:{name:'Sales Agent',emoji:'📞',sys:'You are the Sales Agent for SarkerSiivous Oy. Write professional Finnish quotes. Know Finnish cleaning pricing €25-55/h. Client communications in Finnish.'},
+  marketing:{name:'Marketing Agent',emoji:'📣',sys:'You are the Marketing Agent for SarkerSiivous Oy. Create Finnish social media content. Finnish tone: trustworthy, professional. Posts in Finnish.'},
+  accounting:{name:'Accounting Agent',emoji:'💰',sys:'You are the Accounting Agent for SarkerSiivous Oy. Finnish tax: ALV 25.5%, YEL, TyEL, viitenumero. Documents in Finnish.'},
+  operations:{name:'Operations Agent',emoji:'👷',sys:'You are the Operations Agent for SarkerSiivous Oy. Manage shifts, tasks. Finnish cleaning checklists in Finnish.'}
+};
+function openAgent(name){
+  currentAgent=name;
+  document.querySelectorAll('.agent-pill').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('pill-'+name).classList.add('active');
+  var cfg=agentCfg[name];
+  document.getElementById('agentTitle').textContent=cfg.emoji+' '+cfg.name;
+  document.getElementById('agentWrap').classList.add('open');
+  if(!agentHistories[name].length){
+    document.getElementById('agentMsgs').innerHTML='';
+    addAgentMsg('ai',cfg.emoji+' '+cfg.name+' ready! How can I help?');
+  }
+  document.getElementById('agentInput').focus();
+}
+function closeAgent(){
+  document.getElementById('agentWrap').classList.remove('open');
+  document.querySelectorAll('.agent-pill').forEach(function(p){p.classList.remove('active');});
+}
+function addAgentMsg(role,text){
+  var msgs=document.getElementById('agentMsgs');
+  var div=document.createElement('div');div.className='agent-msg '+role;
+  var av=document.createElement('div');av.className='agent-av';av.textContent=role==='user'?'D':'🤖';
+  var bubble=document.createElement('div');bubble.className='agent-bubble';
+  bubble.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  div.appendChild(av);div.appendChild(bubble);msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function addAgentTyping(){
+  var msgs=document.getElementById('agentMsgs');
+  var div=document.createElement('div');div.className='agent-msg ai';div.id='agentTyping';
+  var av=document.createElement('div');av.className='agent-av';av.textContent='🤖';
+  var bubble=document.createElement('div');bubble.className='agent-bubble';
+  bubble.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  div.appendChild(av);div.appendChild(bubble);msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function buildAgentContext(){
+  var now=new Date();var m=now.getMonth();var y=now.getFullYear();
+  var ms=db.shifts.filter(function(s){var d=new Date(s.date);return d.getMonth()===m&&d.getFullYear()===y;});
+  var rev=ms.filter(function(s){return s.status==='Completed';}).reduce(function(sum,s){return sum+(s.earnings||s.revenue||0);},0);
+  return '\n\nLIVE DATA: Customers: '+db.customers.length+', Users: '+db.users.filter(function(u){return u.active;}).length+', Shifts this month: '+ms.length+', Revenue: €'+rev+', Target: €'+(db.settings&&db.settings.targetRevenue||15000);
+}
+async function sendAgentMsg(){
+  var input=document.getElementById('agentInput');
+  var text=input.value.trim();if(!text)return;
+  input.value='';addAgentMsg('user',text);
+  agentHistories[currentAgent].push({role:'user',content:text});
+  addAgentTyping();
+  try{
+    var cfg=agentCfg[currentAgent];
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:cfg.sys+buildAgentContext(),messages:agentHistories[currentAgent]})});
+    var data=await res.json();
+    var t=document.getElementById('agentTyping');if(t)t.remove();
+    if(data.content&&data.content[0]){var reply=data.content[0].text;agentHistories[currentAgent].push({role:'assistant',content:reply});addAgentMsg('ai',reply);}
+  }catch(e){var t=document.getElementById('agentTyping');if(t)t.remove();addAgentMsg('ai','Connection error. Try again.');}
 }
 </script>
 </body>
