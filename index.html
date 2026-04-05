@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>SarkerSiivous Business OS v1775372075</title>
+<title>SarkerSiivous Business OS v1775379918</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <script>
 function checkPw(){
@@ -572,6 +572,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
     <div class="prof-sec-head"><span class="prof-sec-title">Data</span></div>
     <button class="btn btn-outline" onclick="exportData()">📥 Export Backup</button>
   </div>
+  <div class="prof-section" style="max-width:500px;margin-top:12px">
+    <div class="prof-sec-head"><span class="prof-sec-title">🚀 Deploy Update</span></div>
+    <p style="font-size:13px;color:var(--mist);margin-bottom:12px">Download this CRM file and upload it to GitHub to deploy updates.</p>
+    <div style="background:var(--g50);border:1px solid var(--g100);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:var(--g700)">
+      <strong>Steps:</strong> Click download → Go to github.com/dipok888/sarkersiivous → Add file → Upload files → Drag file → Commit changes
+    </div>
+    <button class="btn btn-primary" onclick="downloadCRM()">⬇️ Download index.html</button>
+  </div>
 </div>
 
 </main>
@@ -655,6 +663,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--snow);color:var(--slate);
           <div class="form-group"><label>City</label><input id="cCity" placeholder="e.g. Espoo"></div>
         </div>
         <div class="form-group" style="margin-bottom:10px"><label>Address</label><input id="cAddr" placeholder="e.g. Mannerheimintie 5 A 12"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Cancellation Period</label><select id="cCancelHome"><option value="">Not specified</option><option value="1 month">1 month</option><option value="2 months">2 months</option><option value="3 months">3 months</option></select></div>
       </div>
       <div id="cOfficeFields" style="display:none">
         <div class="form-grid c2" style="margin-bottom:10px">
@@ -1074,6 +1083,7 @@ function resetCustomerForm(){
     var el=document.getElementById(id);if(el)el.value='';
   });
   var can=document.getElementById('cCancel');if(can)can.value='';
+  var canh=document.getElementById('cCancelHome');if(canh)canh.value='';
   var cil=document.getElementById('contactInputsList');
   if(cil){cil.innerHTML='';addContactInput();}
 }
@@ -1110,8 +1120,13 @@ function getContactInputs(){
 function deleteCustomer(i){if(confirm('Delete this customer?')){db.customers.splice(i,1);save();toast('Deleted');}}
 function renderCustomers(){
   var tbody=document.getElementById('customerTbody');
-  if(!db.customers.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🏢</div><div class="empty-text">No customers yet</div></div></td></tr>';return;}
-  tbody.innerHTML=db.customers.map(function(c,i){
+  var filtered=db.customers.filter(function(c){
+    var typeOk=custTab==='all'||(c.type||'home')===custTab;
+    var activeOk=custActiveOnly?(c.active!==false):true;
+    return typeOk&&activeOk;
+  });
+  if(!filtered.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🏢</div><div class="empty-text">No '+(custActiveOnly?'active ':'')+(custTab==='all'?'':custTab+' ')+'customers yet</div></div></td></tr>';return;}
+  tbody.innerHTML=filtered.map(function(c){var i=db.customers.indexOf(c);
     var contact=c.contacts&&c.contacts.length?c.contacts[0].name:(c.type==='home'?'—':'—');
     var phone=c.contacts&&c.contacts.length?c.contacts[0].phone:(c.phone||'—');
     return '<tr>'+
@@ -1411,6 +1426,7 @@ function saveCustomer(){
     c.email=document.getElementById('cEmail').value;
     c.city=document.getElementById('cCity').value;
     c.addr=document.getElementById('cAddr').value;
+    c.cancel=document.getElementById('cCancelHome').value;
   } else {
     var company=document.getElementById('cCompany').value.trim();
     if(!company){toast('Company name is required');return;}
@@ -1497,7 +1513,8 @@ function renderCustomerProfile(c){
       '<div class="info-item"><label>Phone</label><p>'+(c.phone||'—')+'</p></div>'+
       '<div class="info-item"><label>Email</label><p>'+(c.email||'—')+'</p></div>'+
       '<div class="info-item"><label>City</label><p>'+(c.city||'—')+'</p></div>'+
-      '<div class="info-item"><label>Address</label><p>'+(c.addr||'—')+'</p></div>';
+      '<div class="info-item"><label>Address</label><p>'+(c.addr||'—')+'</p></div>'+
+      '<div class="info-item"><label>Cancellation</label><p>'+(c.cancel||'—')+'</p></div>';
   }
   var contacts=c.contacts||[];
   var cl=document.getElementById('cprofContacts');
@@ -1608,6 +1625,16 @@ function filterTaskSearch(q){
   document.querySelectorAll('#taskTbody tr').forEach(function(r){
     r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
   });
+}
+
+function downloadCRM(){
+  var html=document.documentElement.outerHTML;
+  var blob=new Blob([html],{type:'text/html'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='index.html';a.click();
+  URL.revokeObjectURL(url);
+  toast('Downloaded! Now upload to GitHub 🚀');
 }
 </script>
 </body>
